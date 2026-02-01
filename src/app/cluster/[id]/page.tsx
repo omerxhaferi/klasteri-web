@@ -2,8 +2,11 @@ import { getCluster } from "@/lib/api";
 import { SOURCE_COLORS, CategoryColors, CategoryKey } from "@/lib/constants";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { SiteFooter } from "@/components/site-footer";
 import Link from "next/link";
 import { ChevronLeft, ExternalLink } from "lucide-react";
+
+export const dynamic = 'force-dynamic';
 
 function getTimeAgo(dateString: string): string {
     const now = new Date();
@@ -176,12 +179,7 @@ export default async function ClusterPage({
                 )}
             </main>
 
-            {/* Footer */}
-            <footer className="border-t border-border bg-muted py-8 mt-20 text-center">
-                <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold">
-                    Klasteri © 2026
-                </p>
-            </footer>
+            <SiteFooter />
         </div>
     );
 }

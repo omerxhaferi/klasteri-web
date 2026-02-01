@@ -33,7 +33,7 @@ const API_BASE_URL = rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`;
 
 export async function getNews(): Promise<HomePageData> {
     const res = await fetch(`${API_BASE_URL}/api/news`, {
-        next: { revalidate: 60 }, // Revalidate every minute
+        cache: 'no-store', // Always fetch latest data on arrival
     });
 
     if (!res.ok) {
@@ -45,7 +45,7 @@ export async function getNews(): Promise<HomePageData> {
 
 export async function getNewsByCategory(category: string): Promise<Cluster[]> {
     const res = await fetch(`${API_BASE_URL}/api/news/${category}`, {
-        next: { revalidate: 60 },
+        cache: 'no-store',
     });
 
     if (!res.ok) {
@@ -57,7 +57,7 @@ export async function getNewsByCategory(category: string): Promise<Cluster[]> {
 
 export async function getCluster(id: string): Promise<Cluster> {
     const res = await fetch(`${API_BASE_URL}/api/clusters/${id}`, {
-        next: { revalidate: 300 }, // Cache cluster details for 5 minutes
+        cache: 'no-store',
     });
 
     if (!res.ok) {

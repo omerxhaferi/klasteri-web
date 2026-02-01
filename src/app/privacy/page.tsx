@@ -1,5 +1,6 @@
 import Link from "next/link";
-import Image from "next/image";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 
 export const metadata = {
   title: "Politika e Privatësisë - Klasteri",
@@ -9,25 +10,9 @@ export const metadata = {
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-white sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="h-14 flex items-center">
-            <Link href="/" className="flex items-center gap-2">
-              <Image 
-                src="/icon.png" 
-                alt="Klasteri" 
-                width={32} 
-                height={32}
-                className="rounded"
-              />
-              <span className="text-xl font-bold tracking-tight">Klasteri</span>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <SiteHeader />
 
-      <main className="max-w-4xl mx-auto px-4 py-12">
+      <main className="max-w-5xl mx-auto px-4 py-12">
         <h1 className="text-3xl font-bold mb-2">Politika e Privatësisë</h1>
         <p className="text-muted-foreground mb-8">Përditësuar më: Janar 2026</p>
 
@@ -191,12 +176,7 @@ export default function PrivacyPage() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border bg-muted mt-12">
-        <div className="max-w-4xl mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Klasteri. Të gjitha të drejtat të rezervuara.
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
