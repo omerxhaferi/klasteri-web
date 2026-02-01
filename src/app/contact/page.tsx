@@ -38,20 +38,20 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-medium mb-1">Mbështetje Teknike</h3>
                   <a 
-                    href="mailto:support@klasteri.com" 
+                    href="mailto:info@klasteri.com" 
                     className="text-primary hover:underline"
                   >
-                    support@klasteri.com
+                    info@klasteri.com
                   </a>
                 </div>
 
                 <div>
                   <h3 className="font-medium mb-1">Për Median</h3>
                   <a 
-                    href="mailto:media@klasteri.com" 
+                    href="mailto:info@klasteri.com" 
                     className="text-primary hover:underline"
                   >
-                    media@klasteri.com
+                    info@klasteri.com
                   </a>
                 </div>
               </div>
@@ -99,7 +99,7 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-medium mb-1">Si mund të raportoj një problem?</h3>
                   <p className="text-sm text-muted-foreground">
-                    Për probleme teknike ose gabime, na shkruani në support@klasteri.com me përshkrim 
+                    Për probleme teknike ose gabime, na shkruani në info@klasteri.com me përshkrim 
                     të detajuar të problemit dhe screenshots nëse është e mundur.
                   </p>
                 </div>
@@ -133,7 +133,7 @@ export default function ContactPage() {
             </p>
             <p className="text-muted-foreground leading-relaxed mb-4">
               Për informacione mbi tarifat dhe mundësitë e reklamimit, ju lutemi na kontaktoni 
-              në <a href="mailto:ads@klasteri.com" className="text-primary hover:underline">ads@klasteri.com</a>.
+              në <a href="mailto:info@klasteri.com" className="text-primary hover:underline">info@klasteri.com</a>.
             </p>
           </section>
 
