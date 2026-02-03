@@ -1,5 +1,6 @@
 "use client";
 
+import type { Article } from "@/lib/api";
 import { SOURCE_COLORS, CategoryColors, CategoryKey } from "@/lib/constants";
 import { getAccessibleColor } from "@/lib/utils";
 import { ExternalLink } from "lucide-react";
@@ -19,16 +20,6 @@ function getTimeAgo(dateString: string): string {
     if (days < 7) return `${days} ditë`;
     return date.toLocaleDateString("sq-AL", { day: "numeric", month: "short" });
 }
-
-type Article = {
-    id: string;
-    source_name: string;
-    title: string;
-    content?: string;
-    url: string;
-    image_url?: string | null;
-    crawled_at: string;
-};
 
 type ClusterDetailContentProps = {
     mainArticle: Article | undefined;

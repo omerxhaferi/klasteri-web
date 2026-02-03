@@ -65,11 +65,11 @@ export default async function Home({
     // Collect all cluster IDs from main feed for deduplication
     const mainFeedClusterIds: number[] = [];
     if (selectedCategory === "all") {
-      Object.values(homepageData).forEach(clusters => {
-        clusters.forEach(c => mainFeedClusterIds.push(c.id));
+      Object.values(homepageData).forEach((clusters: Cluster[]) => {
+        clusters.forEach((c: Cluster) => mainFeedClusterIds.push(c.id));
       });
     } else {
-      categoryData.forEach(c => mainFeedClusterIds.push(c.id));
+      categoryData.forEach((c: Cluster) => mainFeedClusterIds.push(c.id));
     }
 
     // Fetch tonight data with exclusions
