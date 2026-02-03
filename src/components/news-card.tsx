@@ -2,7 +2,9 @@
 
 import { Cluster } from "@/lib/api";
 import { CategoryColors, CategoryKey, SOURCE_COLORS } from "@/lib/constants";
+import { getAccessibleColor } from "@/lib/utils";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 interface NewsCardProps {
     cluster: Cluster;
@@ -34,12 +36,20 @@ export function NewsCard({ cluster }: NewsCardProps) {
 
     if (!mainArticle) return null;
 
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => setMounted(true), []);
+
+    const isDarkMode = mounted && typeof document !== "undefined"
+        ? document.documentElement.classList.contains("dark")
+        : false;
+
     const categoryKey = (cluster.category?.toLowerCase() || "vendi") as CategoryKey;
     const categoryColor = CategoryColors[categoryKey] || CategoryColors.vendi;
 
     // Use explicit source color if available, otherwise fallback to category color
-    const mainSourceColor = SOURCE_COLORS[mainArticle.source_name] || categoryColor;
-    const SIMILAR_SOURCE_COLOR = '#3b82f6';
+    const baseSourceColor = SOURCE_COLORS[mainArticle.source_name] || categoryColor;
+    const mainSourceColor = getAccessibleColor(baseSourceColor, isDarkMode);
+    const similarSourceColor = getAccessibleColor('#3b82f6', isDarkMode);
 
     // Get description - add ellipsis if it looks truncated
     const description = mainArticle.content
@@ -114,7 +124,7 @@ export function NewsCard({ cluster }: NewsCardProps) {
                             rel="noopener noreferrer"
                             className="flex items-center gap-2 group/item"
                         >
-                            <span className="text-[13px] font-bold whitespace-nowrap min-w-[60px]" style={{ color: SIMILAR_SOURCE_COLOR }}>
+                            <span className="text-[13px] font-bold whitespace-nowrap min-w-[60px]" style={{ color: similarSourceColor }}>
                                 {article.source_name}
                             </span>
                             <span className="text-[13px] text-muted-foreground hover:underline decoration-1 transition-all truncate flex-1">

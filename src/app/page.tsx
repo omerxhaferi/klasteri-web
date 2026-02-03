@@ -1,7 +1,9 @@
-import { getNews, getNewsByCategory, Cluster, HomePageData } from "@/lib/api";
+import { getNews, getNewsByCategory, getTonightNews, Cluster, HomePageData, TonightData } from "@/lib/api";
 import { NewsCard } from "@/components/news-card";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { TonightSidebar } from "@/components/tonight-sidebar";
+import { TonightMobile } from "@/components/tonight-mobile";
 
 const CATEGORIES = [
   { key: "top_overall", label: "Top Lajmet", href: "/" },
@@ -50,6 +52,7 @@ export default async function Home({
     top_overall: [], vendi: [], rajoni: [], bota: [], sport: [], tech: []
   };
   let categoryData: Cluster[] = [];
+  let tonightData: TonightData = { clusters: [], is_active_hours: false };
   let error = null;
 
   try {
@@ -58,17 +61,46 @@ export default async function Home({
     } else {
       categoryData = await getNewsByCategory(selectedCategory);
     }
+
+    // Collect all cluster IDs from main feed for deduplication
+    const mainFeedClusterIds: number[] = [];
+    if (selectedCategory === "all") {
+      Object.values(homepageData).forEach(clusters => {
+        clusters.forEach(c => mainFeedClusterIds.push(c.id));
+      });
+    } else {
+      categoryData.forEach(c => mainFeedClusterIds.push(c.id));
+    }
+
+    // Fetch tonight data with exclusions
+    try {
+      tonightData = await getTonightNews(mainFeedClusterIds);
+    } catch (e) {
+      console.error("Failed to fetch tonight news:", e);
+    }
   } catch (e) {
     console.error("Failed to fetch news:", e);
     error = "Nuk mund të merren lajmet. Provoni përsëri më vonë.";
   }
+
+  // Dynamic count algorithm: show 5-10 based on quality
+  const qualityThreshold = 5;
+  const highQualityClusters = tonightData.clusters.filter(c => c.today_article_count >= qualityThreshold);
+  const displayCount = Math.max(5, Math.min(10, highQualityClusters.length > 0 ? highQualityClusters.length : tonightData.clusters.length));
+  const tonightClusters = tonightData.clusters.slice(0, displayCount);
 
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader selectedCategory={selectedCategory} />
 
       {/* Main Content */}
-      <main className="max-w-5xl mx-auto px-4 py-6 ">
+      <main className="max-w-7xl mx-auto px-4 py-6">
+        {/* Mobile Tonight Section */}
+        <TonightMobile
+          clusters={tonightClusters}
+          serverIsNight={tonightData.is_active_hours}
+        />
+
         {error && (
           <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-600 dark:text-red-400 text-sm font-medium">
             {error}
@@ -76,6 +108,12 @@ export default async function Home({
         )}
 
         <div className="flex gap-8">
+          {/* Left Sidebar - Tonight Section (only shows 9pm-5am) */}
+          <TonightSidebar
+            clusters={tonightClusters}
+            serverIsNight={tonightData.is_active_hours}
+          />
+
           {/* News Feed */}
           <div className="flex-1 min-w-0">
             {selectedCategory === "all" ? (
@@ -103,10 +141,9 @@ export default async function Home({
               )}
           </div>
 
-          {/* Sidebar - Reserved for Ads */}
+          {/* Right Sidebar - Ads */}
           <aside className="hidden lg:block w-[300px] shrink-0">
             <div className="sticky top-20">
-              {/* Ad Space Placeholder */}
               <div className="bg-muted rounded-lg p-6 text-center text-muted-foreground text-sm min-h-[250px] flex items-center justify-center border border-dashed border-border">
                 {/* Reserved for advertisements */}
               </div>
