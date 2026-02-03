@@ -3,7 +3,7 @@ import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Klasteri - Lajmet në një vend",
+  title: "Klasteri - Lajmet, me rrënjë e degë",
   description: "Agregatori i lajmeve shqip. Të gjitha lajmet nga burime të ndryshme, të grupuara sipas temës.",
   icons: {
     icon: "/icon.png",
