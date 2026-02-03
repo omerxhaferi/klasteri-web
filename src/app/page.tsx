@@ -1,9 +1,11 @@
-import { getNews, getNewsByCategory, getTonightNews, Cluster, HomePageData, TonightData } from "@/lib/api";
+import { getNews, getNewsByCategory, getTonightNews, getDailySummary, Cluster, HomePageData, TonightData, DailySummary } from "@/lib/api";
 import { NewsCard } from "@/components/news-card";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { TonightSidebar } from "@/components/tonight-sidebar";
-import { TonightMobile } from "@/components/tonight-mobile";
+import { TonightMobileCombined } from "@/components/tonight-mobile-combined";
+import { DailySummaryCard } from "@/components/daily-summary";
+import { MainContentWrapper } from "@/components/main-content-wrapper";
 
 const CATEGORIES = [
   { key: "top_overall", label: "Top Lajmet", href: "/" },
@@ -43,16 +45,18 @@ function CategorySection({ title, clusters, color, hideTitle }: { title: string;
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ category?: string; preview?: string }>;
 }) {
   const params = await searchParams;
   const selectedCategory = params.category || "all";
+  const previewSummary = params.preview === "summary";
 
   let homepageData: HomePageData = {
     top_overall: [], vendi: [], rajoni: [], bota: [], sport: [], tech: []
   };
   let categoryData: Cluster[] = [];
   let tonightData: TonightData = { clusters: [], is_active_hours: false };
+  let dailySummary: DailySummary | null = null;
   let error = null;
 
   try {
@@ -78,6 +82,13 @@ export default async function Home({
     } catch (e) {
       console.error("Failed to fetch tonight news:", e);
     }
+
+    // Fetch daily summary
+    try {
+      dailySummary = await getDailySummary();
+    } catch (e) {
+      console.error("Failed to fetch daily summary:", e);
+    }
   } catch (e) {
     console.error("Failed to fetch news:", e);
     error = "Nuk mund të merren lajmet. Provoni përsëri më vonë.";
@@ -91,14 +102,25 @@ export default async function Home({
 
   return (
     <div className="min-h-screen bg-background">
-      <SiteHeader selectedCategory={selectedCategory} />
+      <SiteHeader
+        selectedCategory={selectedCategory}
+        hasTonightClusters={tonightClusters.length > 0}
+        serverIsNight={tonightData.is_active_hours}
+        forceShow={previewSummary}
+      />
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        {/* Mobile Tonight Section */}
-        <TonightMobile
+      <MainContentWrapper
+        hasTonightClusters={tonightClusters.length > 0}
+        serverIsNight={tonightData.is_active_hours}
+        forceShow={previewSummary}
+      >
+        {/* Mobile Combined Section - Tonight Focus + Daily Summary */}
+        <TonightMobileCombined
           clusters={tonightClusters}
+          summary={dailySummary}
           serverIsNight={tonightData.is_active_hours}
+          forceShow={previewSummary}
         />
 
         {error && (
@@ -112,10 +134,20 @@ export default async function Home({
           <TonightSidebar
             clusters={tonightClusters}
             serverIsNight={tonightData.is_active_hours}
+            forceShow={previewSummary}
           />
 
           {/* News Feed */}
           <div className="flex-1 min-w-0">
+            {/* Daily Summary - shows 9pm-5am, desktop only (mobile is combined above) */}
+            <div className="hidden lg:block">
+              <DailySummaryCard
+                summary={dailySummary}
+                serverIsNight={tonightData.is_active_hours}
+                forceShow={previewSummary}
+              />
+            </div>
+
             {selectedCategory === "all" ? (
               <>
                 <CategorySection title="Top Lajmet" clusters={homepageData.top_overall} color={CategoryColors.top_overall} hideTitle={true} />
@@ -153,8 +185,9 @@ export default async function Home({
               </div>
             </div>
           </aside>
+
         </div>
-      </main>
+      </MainContentWrapper>
 
       <SiteFooter />
     </div>

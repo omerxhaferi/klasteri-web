@@ -10,6 +10,7 @@ import { useNightMode } from "@/hooks/use-night-mode";
 interface TonightSidebarProps {
     clusters: TonightCluster[];
     serverIsNight: boolean;
+    forceShow?: boolean;
 }
 
 function formatTime(dateString: string): string {
@@ -21,7 +22,7 @@ function formatTime(dateString: string): string {
     });
 }
 
-export function TonightSidebar({ clusters, serverIsNight }: TonightSidebarProps) {
+export function TonightSidebar({ clusters, serverIsNight, forceShow = false }: TonightSidebarProps) {
     const clientIsNight = useNightMode();
     const [mounted, setMounted] = useState(false);
 
@@ -36,7 +37,7 @@ export function TonightSidebar({ clusters, serverIsNight }: TonightSidebarProps)
         ? document.documentElement.classList.contains("dark")
         : false;
 
-    if (!isNight || clusters.length === 0) {
+    if ((!isNight && !forceShow) || clusters.length === 0) {
         return null;
     }
 

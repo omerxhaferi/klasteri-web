@@ -128,3 +128,28 @@ export async function searchNews(query: string, limit = 20): Promise<SearchResul
 
     return res.json();
 }
+
+export interface DailySummary {
+    id: number;
+    summary_date: string;
+    summary_text: string;
+    cluster_ids: number[];
+    created_at: string;
+    clusters?: { id: number; title: string; category: string }[];
+}
+
+export async function getDailySummary(): Promise<DailySummary | null> {
+    const res = await fetch(`${API_BASE_URL}/api/summary/today`, {
+        cache: 'no-store',
+    });
+
+    if (res.status === 404) {
+        return null; // No summary available
+    }
+
+    if (!res.ok) {
+        throw new Error('Failed to fetch daily summary');
+    }
+
+    return res.json();
+}

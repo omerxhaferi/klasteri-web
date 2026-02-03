@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SearchBar } from "@/components/search-bar";
+import { useNightMode } from "@/hooks/use-night-mode";
 
 const CATEGORIES = [
   { key: "top_overall", label: "Top Lajmet", href: "/" },
@@ -14,11 +15,31 @@ const CATEGORIES = [
   { key: "tech", label: "Tech", href: "/?category=tech" },
 ] as const;
 
-export function SiteHeader({ selectedCategory }: { selectedCategory?: string }) {
+interface SiteHeaderProps {
+  selectedCategory?: string;
+  hasTonightClusters?: boolean;
+  serverIsNight?: boolean;
+  forceShow?: boolean;
+}
+
+export function SiteHeader({
+  selectedCategory,
+  hasTonightClusters = false,
+  serverIsNight = false,
+  forceShow = false
+}: SiteHeaderProps) {
+  const clientIsNight = useNightMode();
+
+  // Determine if the left "In Focus" sidebar will be visible
+  const leftSidebarVisible = (clientIsNight || serverIsNight || forceShow) && hasTonightClusters;
+
+  // Match the main content width
+  const maxWidthClass = leftSidebarVisible ? 'max-w-7xl' : 'max-w-6xl';
+
   return (
     <>
       <header className="border-b border-border bg-card sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-4">
+        <div className={`${maxWidthClass} mx-auto px-4 transition-all duration-300`}>
           <div className="h-14 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
               <Logo width={32} height={32} />
@@ -30,12 +51,11 @@ export function SiteHeader({ selectedCategory }: { selectedCategory?: string }) 
                   <Link
                     key={cat.key}
                     href={cat.href}
-                    className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                      (selectedCategory === "all" && cat.key === "top_overall") ||
-                      selectedCategory === cat.key
+                    className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${(selectedCategory === "all" && cat.key === "top_overall") ||
+                        selectedCategory === cat.key
                         ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-blue-400"
                         : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    }`}
+                      }`}
                   >
                     {cat.label}
                   </Link>
@@ -58,12 +78,11 @@ export function SiteHeader({ selectedCategory }: { selectedCategory?: string }) 
               <Link
                 key={cat.key}
                 href={cat.href}
-                className={`px-3 py-1.5 text-sm font-medium rounded-full whitespace-nowrap transition-colors ${
-                  (selectedCategory === "all" && cat.key === "top_overall") ||
-                  selectedCategory === cat.key
+                className={`px-3 py-1.5 text-sm font-medium rounded-full whitespace-nowrap transition-colors ${(selectedCategory === "all" && cat.key === "top_overall") ||
+                    selectedCategory === cat.key
                     ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-blue-400"
                     : "bg-muted text-muted-foreground"
-                }`}
+                  }`}
               >
                 {cat.label}
               </Link>
@@ -74,3 +93,4 @@ export function SiteHeader({ selectedCategory }: { selectedCategory?: string }) 
     </>
   );
 }
+

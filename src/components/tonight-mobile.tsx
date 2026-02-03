@@ -10,6 +10,7 @@ import { useNightMode } from "@/hooks/use-night-mode";
 interface TonightMobileProps {
     clusters: TonightCluster[];
     serverIsNight: boolean;
+    forceShow?: boolean;
 }
 
 function formatTime(dateString: string): string {
@@ -21,7 +22,7 @@ function formatTime(dateString: string): string {
     });
 }
 
-export function TonightMobile({ clusters, serverIsNight }: TonightMobileProps) {
+export function TonightMobile({ clusters, serverIsNight, forceShow = false }: TonightMobileProps) {
     const clientIsNight = useNightMode();
     const [mounted, setMounted] = useState(false);
 
@@ -36,7 +37,7 @@ export function TonightMobile({ clusters, serverIsNight }: TonightMobileProps) {
         ? document.documentElement.classList.contains("dark")
         : false;
 
-    if (!isNight || clusters.length === 0) return null;
+    if ((!isNight && !forceShow) || clusters.length === 0) return null;
 
     return (
         <div className="lg:hidden mb-6 -mx-4 px-4">
