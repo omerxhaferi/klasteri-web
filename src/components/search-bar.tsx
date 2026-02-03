@@ -67,7 +67,7 @@ export function SearchBar() {
             {/* Mobile Search Icon */}
             <button
                 onClick={openMobileSearch}
-                className="md:hidden p-2 text-muted-foreground hover:text-foreground transition-colors"
+                className="md:hidden p-2 text-foreground/60 hover:text-foreground transition-colors"
                 aria-label="Kërko"
             >
                 <Search className="h-5 w-5" />
