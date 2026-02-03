@@ -9,7 +9,7 @@ export function useNightMode() {
         const checkTime = () => {
             const now = new Date();
             const hour = now.getHours();
-            setIsNightTime(hour >= 21 || hour < 5); // 9 PM to 5 AM
+            setIsNightTime(hour >= 19 || hour < 5); // 7 PM to 5 AM
         };
 
         checkTime(); // Initial check
