@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { SearchBar } from "@/components/search-bar";
 
 const CATEGORIES = [
   { key: "top_overall", label: "Top Lajmet", href: "/" },
@@ -40,6 +41,8 @@ export function SiteHeader({ selectedCategory }: { selectedCategory?: string }) 
                   </Link>
                 ))}
               </div>
+              <div className="h-6 w-px bg-border mx-2 hidden md:block" />
+              <SearchBar />
               <div className="h-6 w-px bg-border mx-2 hidden md:block" />
               <ThemeToggle />
             </nav>

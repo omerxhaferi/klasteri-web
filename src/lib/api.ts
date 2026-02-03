@@ -105,3 +105,26 @@ export async function getTonightNews(excludeIds: number[] = []): Promise<Tonight
 
     return res.json();
 }
+
+export interface SearchResult {
+    clusters: Cluster[];
+    total_count: number;
+    query: string;
+}
+
+export async function searchNews(query: string, limit = 20): Promise<SearchResult> {
+    const params = new URLSearchParams({
+        q: query,
+        limit: limit.toString(),
+    });
+
+    const res = await fetch(`${API_BASE_URL}/api/search?${params}`, {
+        cache: 'no-store',
+    });
+
+    if (!res.ok) {
+        throw new Error('Failed to search news');
+    }
+
+    return res.json();
+}
