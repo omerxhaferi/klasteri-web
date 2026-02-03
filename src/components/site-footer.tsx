@@ -11,7 +11,7 @@ export function SiteFooter() {
             <span className="font-semibold">Klasteri</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            Agregatori i lajmeve shqip
+            Lajmet, me rrënjë e degë
           </p>
           <div className="flex gap-6 text-sm text-muted-foreground">
             <Link href="/privacy" className="hover:text-foreground">Privatësia</Link>
