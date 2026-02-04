@@ -104,7 +104,6 @@ export function TonightMobileCombined({
     if ((!isNight && !forceShow) || clusters.length === 0) return null;
 
     const hasSummary = summary !== null;
-    const dayLabel = hasSummary && isToday(summary.summary_date) ? "sot" : "dje";
 
     return (
         <>
@@ -117,7 +116,7 @@ export function TonightMobileCombined({
                         </div>
                         <div>
                             <h2 className="text-sm font-bold text-foreground">
-                                Çfarë ndodhi {dayLabel}?
+                                Çfarë ndodhi sot?
                             </h2>
                             <p className="text-xs text-muted-foreground">Temat më të ndjekura</p>
                         </div>
@@ -207,7 +206,7 @@ export function TonightMobileCombined({
                             <div>
                                 <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
                                     <Sparkles className="h-5 w-5 text-primary" />
-                                    Çfarë ndodhi {dayLabel}?
+                                    Çfarë ndodhi sot?
                                 </h2>
                                 <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                                     <Clock className="h-3 w-3" />

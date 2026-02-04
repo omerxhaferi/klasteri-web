@@ -83,9 +83,6 @@ export function DailySummaryCard({ summary, serverIsNight, forceShow = false }: 
         return null;
     }
 
-    const isSummaryToday = isToday(summary.summary_date);
-    const dayLabel = isSummaryToday ? "sot" : "dje";
-
     return (
         <>
             {/* Compact Trigger */}
@@ -99,7 +96,7 @@ export function DailySummaryCard({ summary, serverIsNight, forceShow = false }: 
                             <Sparkles className="h-4 w-4 text-primary" />
                         </div>
                         <span className="text-sm font-medium text-foreground">
-                            Çfarë ndodhi {dayLabel}?
+                            Çfarë ndodhi sot?
                         </span>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-primary group-hover:gap-3 transition-all">
@@ -125,7 +122,7 @@ export function DailySummaryCard({ summary, serverIsNight, forceShow = false }: 
                             <div>
                                 <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
                                     <Sparkles className="h-5 w-5 text-primary" />
-                                    Çfarë ndodhi {dayLabel}?
+                                    Çfarë ndodhi sot?
                                 </h2>
                                 <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                                     <Clock className="h-3 w-3" />
