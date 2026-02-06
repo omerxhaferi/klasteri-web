@@ -108,18 +108,6 @@ export function NewsCard({ cluster }: NewsCardProps) {
                                 >
                                     {timeInfo.text}
                                 </span>
-                                {remainingCount > 0 && (
-                                    <>
-                                        <span>·</span>
-                                        <Link
-                                            href={`/cluster/${cluster.id}`}
-                                            className="text-[13px] font-semibold text-foreground hover:underline flex items-center gap-0.5"
-                                        >
-                                            {remainingCount} lajme tjera
-                                            <span className="text-[10px]">›</span>
-                                        </Link>
-                                    </>
-                                )}
                             </div>
                         );
                     })()}
@@ -175,6 +163,16 @@ export function NewsCard({ cluster }: NewsCardProps) {
                         );
                     })}
                 </div>
+            )}
+
+            {remainingCount > 0 && (
+                <Link
+                    href={`/cluster/${cluster.id}`}
+                    className="text-[13px] font-semibold text-foreground hover:underline flex items-center gap-0.5"
+                >
+                    {remainingCount} lajme tjera
+                    <span className="text-[10px]">›</span>
+                </Link>
             )}
 
         </article>
