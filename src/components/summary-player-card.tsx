@@ -88,7 +88,9 @@ export function SummaryPlayerCard({ summary }: SummaryPlayerCardProps) {
     const [isLoadingAudio, setIsLoadingAudio] = useState(false);
     const [progress, setProgress] = useState(0);
     const [timeRemaining, setTimeRemaining] = useState(0);
+    const [duration, setDuration] = useState(0);
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const progressBarRef = useRef<HTMLDivElement>(null);
 
     const timeLabel = getSummaryTimeLabel(summary.created_at);
 
@@ -102,6 +104,7 @@ export function SummaryPlayerCard({ summary }: SummaryPlayerCardProps) {
         setIsPaused(false);
         setProgress(0);
         setTimeRemaining(0);
+        setDuration(0);
     }, []);
 
     const togglePause = useCallback(() => {
@@ -119,6 +122,24 @@ export function SummaryPlayerCard({ summary }: SummaryPlayerCardProps) {
         setIsModalOpen(false);
     }, []);
 
+    const seekToPosition = useCallback((clientX: number) => {
+        if (!audioRef.current || !audioRef.current.duration || !progressBarRef.current) return;
+        const rect = progressBarRef.current.getBoundingClientRect();
+        const percentage = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        audioRef.current.currentTime = percentage * audioRef.current.duration;
+    }, []);
+
+    const handlePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+        e.currentTarget.setPointerCapture(e.pointerId);
+        seekToPosition(e.clientX);
+    }, [seekToPosition]);
+
+    const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+            seekToPosition(e.clientX);
+        }
+    }, [seekToPosition]);
+
     const playAudio = useCallback(() => {
         if (playerActive) {
             stopAudio();
@@ -133,6 +154,7 @@ export function SummaryPlayerCard({ summary }: SummaryPlayerCardProps) {
             setIsLoadingAudio(false);
             setPlayerActive(true);
             setIsPaused(false);
+            setDuration(audio.duration || 0);
             audio.play();
         }, { once: true });
 
@@ -187,74 +209,85 @@ export function SummaryPlayerCard({ summary }: SummaryPlayerCardProps) {
 
     return (
         <>
-            {/* Ultra-compact single-line player */}
-            <div className="flex items-center gap-2 h-8">
-                {playerActive ? (
-                    /* Playing/paused state: pause/play + stop + progress + time */
-                    <>
+            {/* Summary Player Card */}
+            <div className="rounded-xl bg-primary/4 dark:bg-primary/8 border border-primary/15 px-3 py-2.5">
+                {/* Top row */}
+                <div className="flex items-center gap-2">
+                    <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span className="text-[12px] font-semibold text-foreground truncate flex-1">
+                        {timeLabel}
+                    </span>
+
+                    {playerActive && (
+                        <>
+                            <button
+                                onClick={togglePause}
+                                className="w-6 h-6 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center shrink-0 transition-colors"
+                            >
+                                {isPaused ? (
+                                    <Play className="h-2.5 w-2.5 fill-primary text-primary ml-0.5" />
+                                ) : (
+                                    <Pause className="h-2.5 w-2.5 fill-primary text-primary" />
+                                )}
+                            </button>
+                            <button
+                                onClick={stopAudio}
+                                className="w-6 h-6 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center shrink-0 transition-colors"
+                            >
+                                <Square className="h-2 w-2 fill-primary text-primary" />
+                            </button>
+                        </>
+                    )}
+
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="text-[11px] text-muted-foreground hover:text-foreground font-medium transition-colors shrink-0 flex items-center gap-1"
+                    >
+                        <BookOpen className="h-3 w-3" />
+                        Lexo
+                    </button>
+
+                    {!playerActive && summary.has_audio && (
                         <button
-                            onClick={togglePause}
-                            className="w-5 h-5 rounded-full bg-muted-foreground/15 hover:bg-muted-foreground/25 flex items-center justify-center shrink-0 transition-colors"
+                            onClick={playAudio}
+                            disabled={isLoadingAudio}
+                            className="bg-primary/90 hover:bg-primary text-white rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors shrink-0 flex items-center gap-1.5 disabled:opacity-50"
                         >
-                            {isPaused ? (
-                                <Play className="h-2.5 w-2.5 fill-muted-foreground text-muted-foreground ml-0.5" />
+                            {isLoadingAudio ? (
+                                <div className="h-3 w-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                             ) : (
-                                <Pause className="h-2.5 w-2.5 fill-muted-foreground text-muted-foreground" />
+                                <Volume2 className="h-3 w-3" />
                             )}
+                            Dëgjo
                         </button>
-                        <button
-                            onClick={stopAudio}
-                            className="w-5 h-5 rounded-full bg-muted-foreground/15 hover:bg-muted-foreground/25 flex items-center justify-center shrink-0 transition-colors"
-                        >
-                            <Square className="h-2 w-2 fill-muted-foreground text-muted-foreground" />
-                        </button>
-                        <span className="text-[11px] text-muted-foreground font-medium shrink-0">
-                            {timeLabel}
+                    )}
+                </div>
+
+                {/* Seekable progress bar */}
+                {playerActive && (
+                    <div className="flex items-center gap-2 mt-2">
+                        <span className="text-[10px] text-muted-foreground tabular-nums shrink-0 w-7 text-right">
+                            {formatTimeRemaining(progress * duration)}
                         </span>
-                        <div className="flex-1 min-w-0">
-                            <div className="h-1 bg-muted rounded-full overflow-hidden">
-                                <div
-                                    className="h-full bg-muted-foreground/40 rounded-full transition-all duration-200"
-                                    style={{ width: `${progress * 100}%` }}
-                                />
-                            </div>
+                        <div
+                            ref={progressBarRef}
+                            onPointerDown={handlePointerDown}
+                            onPointerMove={handlePointerMove}
+                            className="flex-1 h-1.5 bg-muted rounded-full cursor-pointer relative group touch-none"
+                        >
+                            <div
+                                className="h-full bg-primary/50 rounded-full"
+                                style={{ width: `${progress * 100}%` }}
+                            />
+                            <div
+                                className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 bg-primary rounded-full shadow-sm"
+                                style={{ left: `${progress * 100}%` }}
+                            />
                         </div>
-                        <span className="text-[10px] text-muted-foreground tabular-nums shrink-0">
+                        <span className="text-[10px] text-muted-foreground tabular-nums shrink-0 w-7">
                             {formatTimeRemaining(timeRemaining)}
                         </span>
-                    </>
-                ) : (
-                    /* Default state: label · icon Lexo · icon Dëgjo */
-                    <>
-                        <span className="text-[12px] text-foreground font-semibold truncate">
-                            {timeLabel}
-                        </span>
-                        <span className="text-muted-foreground/30 text-[10px]">·</span>
-                        <button
-                            onClick={() => setIsModalOpen(true)}
-                            className="text-[12px] text-muted-foreground hover:text-foreground font-medium transition-colors shrink-0 flex items-center gap-1"
-                        >
-                            <BookOpen className="h-3 w-3" />
-                            Lexo
-                        </button>
-                        {summary.has_audio && (
-                            <>
-                                <span className="text-muted-foreground/30 text-[10px]">·</span>
-                                <button
-                                    onClick={playAudio}
-                                    disabled={isLoadingAudio}
-                                    className="text-[12px] text-muted-foreground hover:text-foreground font-medium transition-colors shrink-0 flex items-center gap-1 disabled:opacity-50"
-                                >
-                                    {isLoadingAudio ? (
-                                        <div className="h-3 w-3 border border-muted-foreground/40 border-t-muted-foreground rounded-full animate-spin" />
-                                    ) : (
-                                        <Volume2 className="h-3 w-3" />
-                                    )}
-                                    Dëgjo
-                                </button>
-                            </>
-                        )}
-                    </>
+                    </div>
                 )}
             </div>
 

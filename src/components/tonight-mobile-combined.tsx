@@ -88,29 +88,29 @@ export function TonightMobileCombined({
                                 </h3>
                             </a>
 
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-1 text-[10px]">
-                                    <span
-                                        className="font-bold uppercase"
-                                        style={{ color: sourceColor }}
-                                    >
-                                        {article.source_name}
-                                    </span>
-                                    <span className="text-muted-foreground">·</span>
-                                    <span className="text-muted-foreground">
-                                        {formatTime(article.crawled_at)}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {cluster.total_article_count > 1 && (
-                                <Link
-                                    href={`/cluster/${cluster.id}`}
-                                    className="text-[10px] text-primary hover:underline mt-2 inline-block"
+                            <div className="flex items-center gap-1 text-[10px]">
+                                <span
+                                    className="font-bold uppercase"
+                                    style={{ color: sourceColor }}
                                 >
-                                    {cluster.total_article_count} lajme ›
-                                </Link>
-                            )}
+                                    {article.source_name}
+                                </span>
+                                <span className="text-muted-foreground">·</span>
+                                <span className="text-muted-foreground">
+                                    {formatTime(article.crawled_at)}
+                                </span>
+                                {cluster.total_article_count > 1 && (
+                                    <>
+                                        <span className="text-muted-foreground">·</span>
+                                        <Link
+                                            href={`/cluster/${cluster.id}`}
+                                            className="text-primary hover:underline whitespace-nowrap"
+                                        >
+                                            {cluster.total_article_count} lajme ›
+                                        </Link>
+                                    </>
+                                )}
+                            </div>
                         </div>
                     );
                 })}
