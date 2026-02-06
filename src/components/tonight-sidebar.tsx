@@ -58,7 +58,7 @@ export function TonightSidebar({ clusters, summary, serverIsNight, forceShow = f
                 <div className="bg-card rounded-xl border border-border overflow-hidden flex-1 min-h-0 flex flex-col">
                     {/* Header */}
                     <div className="px-4 py-3 border-b border-border shrink-0">
-                        <h2 className="text-foreground font-bold text-sm">Sot në fokus</h2>
+                        <h2 className="text-foreground font-bold text-sm">Në fokus</h2>
                         <p className="text-muted-foreground text-xs mt-0.5">
                             Temat më të ndjekura
                         </p>

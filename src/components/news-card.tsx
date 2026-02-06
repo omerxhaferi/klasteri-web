@@ -145,9 +145,14 @@ export function NewsCard({ cluster }: NewsCardProps) {
                                 href={article.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className={`flex items-center gap-2 group/item ${isRecent ? "pl-2 border-l-2" : ""}`}
-                                style={isRecent ? { borderLeftColor: "#f97316" } : undefined}
+                                className="flex items-center gap-2 group/item relative"
                             >
+                                {isRecent && (
+                                    <span
+                                        className="absolute rounded-full"
+                                        style={{ left: "-10px", top: 2, bottom: 2, width: "3px", backgroundColor: "#f97416c9" }}
+                                    />
+                                )}
                                 <span className="text-[13px] font-bold whitespace-nowrap min-w-[60px]" style={{ color: similarSourceColor }}>
                                     {article.source_name}
                                 </span>
