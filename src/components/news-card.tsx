@@ -10,23 +10,34 @@ interface NewsCardProps {
     cluster: Cluster;
 }
 
-function getTimeAgo(dateString: string): string {
+const RECENT_THRESHOLD_MINUTES = 18;
+
+function getTimeAgo(dateString: string): { text: string; isRecent: boolean } {
     const now = new Date();
     const date = new Date(dateString.replace("Z", ""));
     const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-    if (seconds < 60) return "tani";
-
     const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes} min`;
+
+    if (minutes < RECENT_THRESHOLD_MINUTES) {
+        return { text: "tani", isRecent: true };
+    }
+
+    if (minutes < 60) return { text: `${minutes} min`, isRecent: false };
 
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours} orë`;
+    if (hours < 24) return { text: `${hours} orë`, isRecent: false };
 
     const days = Math.floor(hours / 24);
-    if (days < 7) return `${days} ditë`;
+    if (days < 7) return { text: `${days} ditë`, isRecent: false };
 
-    return date.toLocaleDateString("sq-AL", { day: "numeric", month: "short" });
+    return { text: date.toLocaleDateString("sq-AL", { day: "numeric", month: "short" }), isRecent: false };
+}
+
+function isRecentArticle(dateString: string): boolean {
+    const now = new Date();
+    const date = new Date(dateString.replace("Z", ""));
+    const minutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    return minutes < RECENT_THRESHOLD_MINUTES;
 }
 
 export function NewsCard({ cluster }: NewsCardProps) {
@@ -80,16 +91,26 @@ export function NewsCard({ cluster }: NewsCardProps) {
                     )}
 
                     {/* Source info - Also grouped on the left */}
-                    <div className="flex items-center gap-2 text-[13px] text-muted-foreground">
-                        <span
-                            className="font-bold uppercase tracking-tight"
-                            style={{ color: mainSourceColor }}
-                        >
-                            {mainArticle.source_name}
-                        </span>
-                        <span>·</span>
-                        <span>{getTimeAgo(mainArticle.crawled_at)}</span>
-                    </div>
+                    {(() => {
+                        const timeInfo = getTimeAgo(mainArticle.crawled_at);
+                        return (
+                            <div className="flex items-center gap-2 text-[13px] text-muted-foreground">
+                                <span
+                                    className="font-bold uppercase tracking-tight"
+                                    style={{ color: mainSourceColor }}
+                                >
+                                    {mainArticle.source_name}
+                                </span>
+                                <span>·</span>
+                                <span
+                                    className={timeInfo.isRecent ? "font-semibold" : ""}
+                                    style={timeInfo.isRecent ? { color: "#f97316" } : undefined}
+                                >
+                                    {timeInfo.text}
+                                </span>
+                            </div>
+                        );
+                    })()}
                 </div>
 
                 {mainArticle.image_url && (
@@ -116,22 +137,26 @@ export function NewsCard({ cluster }: NewsCardProps) {
             {/* Other sources covering this story - Full Width below the top section */}
             {otherSources.length > 0 && (
                 <div className="space-y-1.5 mb-3">
-                    {otherSources.map((article) => (
-                        <a
-                            key={article.id}
-                            href={article.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2 group/item"
-                        >
-                            <span className="text-[13px] font-bold whitespace-nowrap min-w-[60px]" style={{ color: similarSourceColor }}>
-                                {article.source_name}
-                            </span>
-                            <span className="text-[13px] text-muted-foreground hover:underline decoration-1 transition-all truncate flex-1">
-                                {article.title}
-                            </span>
-                        </a>
-                    ))}
+                    {otherSources.map((article) => {
+                        const isRecent = isRecentArticle(article.crawled_at);
+                        return (
+                            <a
+                                key={article.id}
+                                href={article.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`flex items-center gap-2 group/item ${isRecent ? "pl-2 border-l-2" : ""}`}
+                                style={isRecent ? { borderLeftColor: "#f97316" } : undefined}
+                            >
+                                <span className="text-[13px] font-bold whitespace-nowrap min-w-[60px]" style={{ color: similarSourceColor }}>
+                                    {article.source_name}
+                                </span>
+                                <span className="text-[13px] text-muted-foreground hover:underline decoration-1 transition-all truncate flex-1">
+                                    {article.title}
+                                </span>
+                            </a>
+                        );
+                    })}
                 </div>
             )}
 

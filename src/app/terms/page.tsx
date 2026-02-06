@@ -70,7 +70,28 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-4">5. Mohimi i Përgjegjësisë</h2>
+            <h2 className="text-xl font-semibold mb-4">5. Përdorimi i Inteligjencës Artificiale (AI)</h2>
+            <p className="text-muted-foreground leading-relaxed mb-4">
+              Klasteri përdor teknologji të inteligjencës artificiale (AI) për të ofruar disa funksionalitete:
+            </p>
+            <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-4">
+              <li><strong>Grupimi i Lajmeve:</strong> AI përdoret për të identifikuar dhe grupuar artikuj të ngjashëm në tema të përbashkëta</li>
+              <li><strong>Përmbledhjet e Lajmeve:</strong> Përmbledhjet ditore të lajmeve gjenerohen automatikisht nga AI bazuar në lajmet kryesore të ditës</li>
+              <li><strong>Audio (Text-to-Speech):</strong> Versionet audio të përmbledhjeve krijohen nga AI</li>
+            </ul>
+            <p className="text-muted-foreground leading-relaxed mb-4">
+              <strong>Disclaimer:</strong> Përmbajtja e gjeneruar nga AI mund të përmbajë pasaktësi ose gabime.
+              Përmbledhjet e AI janë të destinuara si një pasqyrë e përgjithshme dhe nuk zëvendësojnë leximin e
+              artikujve origjinalë. Për informacion të plotë dhe të saktë, gjithmonë referojuni burimeve origjinale të lajmeve.
+            </p>
+            <p className="text-muted-foreground leading-relaxed mb-4">
+              Ne punojmë vazhdimisht për të përmirësuar saktësinë e sistemeve tona të AI, por nuk garantojmë
+              se përmbajtja e gjeneruar është e plotë, e saktë, ose e përshtatshme për qëllime specifike.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold mb-4">6. Mohimi i Përgjegjësisë</h2>
             <p className="text-muted-foreground leading-relaxed mb-4">
               Klasteri ofrohet "siç është" pa asnjë garanci të shprehur apo të nënkuptuar. Ne nuk garantojmë:
             </p>
@@ -87,7 +108,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-4">6. Kufizimi i Përgjegjësisë</h2>
+            <h2 className="text-xl font-semibold mb-4">7. Kufizimi i Përgjegjësisë</h2>
             <p className="text-muted-foreground leading-relaxed mb-4">
               Në masën maksimale të lejuar nga ligji, Klasteri dhe drejtuesit, punonjësit dhe partnerët e tij 
               nuk do të jenë përgjegjës për asnjë dëm të drejtpërdrejtë, të tërthortë, rastësor, special ose 
@@ -96,7 +117,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-4">7. Ndryshimet në Shërbim</h2>
+            <h2 className="text-xl font-semibold mb-4">8. Ndryshimet në Shërbim</h2>
             <p className="text-muted-foreground leading-relaxed mb-4">
               Klasteri rezervon të drejtën për të modifikuar, pezulluar ose ndërprerë çdo aspekt të shërbimit 
               në çdo kohë, pa njoftim paraprak. Ne nuk do të jemi përgjegjës ndaj jush ose palëve të treta për 
@@ -105,7 +126,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-4">8. Ligji i Zbatueshëm</h2>
+            <h2 className="text-xl font-semibold mb-4">9. Ligji i Zbatueshëm</h2>
             <p className="text-muted-foreground leading-relaxed mb-4">
               Këto Kushte Përdorimi rregullohen dhe interpretohen në përputhje me ligjet e Republikës së 
               Maqedonisë së Veriut. Çdo mosmarrëveshje që lind nga këto kushte do të zgjidhet në gjykatat 
@@ -114,7 +135,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-4">9. Kontakti</h2>
+            <h2 className="text-xl font-semibold mb-4">10. Kontakti</h2>
             <p className="text-muted-foreground leading-relaxed">
               Nëse keni pyetje rreth këtyre Kushteve të Përdorimit, ju lutemi na kontaktoni në{" "}
               <Link href="/contact" className="text-primary hover:underline">faqen e kontaktit</Link>.

@@ -4,8 +4,6 @@ import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SearchBar } from "@/components/search-bar";
-import { useNightMode } from "@/hooks/use-night-mode";
-
 const CATEGORIES = [
   { key: "top_overall", label: "Top Lajmet", href: "/" },
   { key: "vendi", label: "Vendi", href: "/?category=vendi" },
@@ -28,10 +26,7 @@ export function SiteHeader({
   serverIsNight = false,
   forceShow = false
 }: SiteHeaderProps) {
-  const clientIsNight = useNightMode();
-
-  // Determine if the left "In Focus" sidebar will be visible
-  const leftSidebarVisible = (clientIsNight || serverIsNight || forceShow) && hasTonightClusters;
+  const leftSidebarVisible = hasTonightClusters;
 
   // Match the main content width
   const maxWidthClass = leftSidebarVisible ? 'max-w-7xl' : 'max-w-6xl';

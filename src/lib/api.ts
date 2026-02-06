@@ -135,7 +135,15 @@ export interface DailySummary {
     summary_text: string;
     cluster_ids: number[];
     created_at: string;
+    has_audio: boolean;
     clusters?: { id: number; title: string; category: string }[];
+}
+
+export function getSummaryAudioUrl(summaryId?: number): string {
+    if (summaryId) {
+        return `${API_BASE_URL}/api/summary/today/audio?id=${summaryId}`;
+    }
+    return `${API_BASE_URL}/api/summary/today/audio`;
 }
 
 export async function getDailySummary(): Promise<DailySummary | null> {

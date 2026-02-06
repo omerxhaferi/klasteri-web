@@ -1,50 +1,61 @@
 "use client";
 
-import { TonightCluster } from "@/lib/api";
+import { DailySummary, TonightCluster } from "@/lib/api";
 import { CategoryColors, CategoryKey, SOURCE_COLORS } from "@/lib/constants";
 import { getAccessibleColor } from "@/lib/utils";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useNightMode } from "@/hooks/use-night-mode";
+import { SummaryPlayerCard } from "@/components/summary-player-card";
 
 interface TonightSidebarProps {
     clusters: TonightCluster[];
+    summary: DailySummary | null;
     serverIsNight: boolean;
     forceShow?: boolean;
 }
 
 function formatTime(dateString: string): string {
     const date = new Date(dateString.replace("Z", ""));
-    return date.toLocaleTimeString("sq-AL", {
+    const now = new Date();
+    const isYesterday =
+        date.getDate() !== now.getDate() ||
+        date.getMonth() !== now.getMonth() ||
+        date.getFullYear() !== now.getFullYear();
+    const time = date.toLocaleTimeString("sq-AL", {
         hour: "2-digit",
         minute: "2-digit",
         hour12: false
     });
+    return isYesterday ? `Dje ${time}` : time;
 }
 
-export function TonightSidebar({ clusters, serverIsNight, forceShow = false }: TonightSidebarProps) {
-    const clientIsNight = useNightMode();
+export function TonightSidebar({ clusters, summary, serverIsNight, forceShow = false }: TonightSidebarProps) {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
         setMounted(true);
     }, []);
 
-    // Use server value until after hydration so server and client first paint match
-    const isNight = mounted ? clientIsNight : serverIsNight;
-
     const isDarkMode = mounted && typeof document !== "undefined"
         ? document.documentElement.classList.contains("dark")
         : false;
 
-    if ((!isNight && !forceShow) || clusters.length === 0) {
+    if (clusters.length === 0) {
         return null;
     }
 
     return (
         <aside className="hidden lg:block w-[280px] shrink-0">
-            <div className="sticky top-20 h-[calc(100vh-6rem)]">
-                <div className="bg-card rounded-xl border border-border overflow-hidden h-full flex flex-col">
+            <div className="sticky top-20 h-[calc(100vh-6rem)] flex flex-col gap-2">
+                {/* Summary Player - standalone above the sidebar card */}
+                {summary && (
+                    <div className="px-1 shrink-0">
+                        <SummaryPlayerCard summary={summary} />
+                    </div>
+                )}
+
+                {/* Sidebar Card */}
+                <div className="bg-card rounded-xl border border-border overflow-hidden flex-1 min-h-0 flex flex-col">
                     {/* Header */}
                     <div className="px-4 py-3 border-b border-border shrink-0">
                         <h2 className="text-foreground font-bold text-sm">Sot në fokus</h2>

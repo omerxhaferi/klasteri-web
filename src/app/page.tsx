@@ -4,7 +4,6 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { TonightSidebar } from "@/components/tonight-sidebar";
 import { TonightMobileCombined } from "@/components/tonight-mobile-combined";
-import { DailySummaryCard } from "@/components/daily-summary";
 import { MainContentWrapper } from "@/components/main-content-wrapper";
 
 const CATEGORIES = [
@@ -94,11 +93,27 @@ export default async function Home({
     error = "Nuk mund të merren lajmet. Provoni përsëri më vonë.";
   }
 
+  // Split clusters into today vs yesterday based on top_article.crawled_at
+  const now = new Date();
+  const todayClusters = tonightData.clusters.filter(c => {
+    const d = new Date(c.top_article.crawled_at.replace("Z", ""));
+    return d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+  const yesterdayClusters = tonightData.clusters.filter(c => {
+    const d = new Date(c.top_article.crawled_at.replace("Z", ""));
+    return d.getDate() !== now.getDate() || d.getMonth() !== now.getMonth() || d.getFullYear() !== now.getFullYear();
+  });
+
+  // If today has 5+ clusters, show today + yesterday; otherwise show only yesterday
+  const filteredClusters = todayClusters.length >= 5
+    ? [...todayClusters, ...yesterdayClusters]
+    : yesterdayClusters;
+
   // Dynamic count algorithm: show 5-10 based on quality
   const qualityThreshold = 5;
-  const highQualityClusters = tonightData.clusters.filter(c => c.today_article_count >= qualityThreshold);
-  const displayCount = Math.max(5, Math.min(10, highQualityClusters.length > 0 ? highQualityClusters.length : tonightData.clusters.length));
-  const tonightClusters = tonightData.clusters.slice(0, displayCount);
+  const highQualityClusters = filteredClusters.filter(c => c.today_article_count >= qualityThreshold);
+  const displayCount = Math.max(5, Math.min(10, highQualityClusters.length > 0 ? highQualityClusters.length : filteredClusters.length));
+  const tonightClusters = filteredClusters.slice(0, displayCount);
 
   return (
     <div className="min-h-screen bg-background">
@@ -115,7 +130,7 @@ export default async function Home({
         serverIsNight={tonightData.is_active_hours}
         forceShow={previewSummary}
       >
-        {/* Mobile Combined Section - Tonight Focus + Daily Summary */}
+        {/* Mobile Combined Section - Tonight Focus + Summary Player */}
         <TonightMobileCombined
           clusters={tonightClusters}
           summary={dailySummary}
@@ -130,24 +145,16 @@ export default async function Home({
         )}
 
         <div className="flex gap-8">
-          {/* Left Sidebar - Tonight Section (only shows 9pm-5am) */}
+          {/* Left Sidebar - Tonight Section with Summary Player */}
           <TonightSidebar
             clusters={tonightClusters}
+            summary={dailySummary}
             serverIsNight={tonightData.is_active_hours}
             forceShow={previewSummary}
           />
 
           {/* News Feed */}
           <div className="flex-1 min-w-0">
-            {/* Daily Summary - shows 9pm-5am, desktop only (mobile is combined above) */}
-            <div className="hidden lg:block">
-              <DailySummaryCard
-                summary={dailySummary}
-                serverIsNight={tonightData.is_active_hours}
-                forceShow={previewSummary}
-              />
-            </div>
-
             {selectedCategory === "all" ? (
               <>
                 <CategorySection title="Top Lajmet" clusters={homepageData.top_overall} color={CategoryColors.top_overall} hideTitle={true} />
