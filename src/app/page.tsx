@@ -93,27 +93,9 @@ export default async function Home({
     error = "Nuk mund të merren lajmet. Provoni përsëri më vonë.";
   }
 
-  // Split clusters into today vs yesterday based on top_article.crawled_at
-  const now = new Date();
-  const todayClusters = tonightData.clusters.filter(c => {
-    const d = new Date(c.top_article.crawled_at.replace("Z", ""));
-    return d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-  });
-  const yesterdayClusters = tonightData.clusters.filter(c => {
-    const d = new Date(c.top_article.crawled_at.replace("Z", ""));
-    return d.getDate() !== now.getDate() || d.getMonth() !== now.getMonth() || d.getFullYear() !== now.getFullYear();
-  });
-
-  // If today has 5+ clusters, show today + yesterday; otherwise show only yesterday
-  const filteredClusters = todayClusters.length >= 5
-    ? [...todayClusters, ...yesterdayClusters]
-    : yesterdayClusters;
-
-  // Dynamic count algorithm: show 5-10 based on quality
-  const qualityThreshold = 5;
-  const highQualityClusters = filteredClusters.filter(c => c.today_article_count >= qualityThreshold);
-  const displayCount = Math.max(5, Math.min(10, highQualityClusters.length > 0 ? highQualityClusters.length : filteredClusters.length));
-  const tonightClusters = filteredClusters.slice(0, displayCount);
+  // Backend already returns clusters sorted: today first (by article_count DESC),
+  // then yesterday (by article_count DESC). Just take up to 10 results.
+  const tonightClusters = tonightData.clusters.slice(0, 12);
 
   return (
     <div className="min-h-screen bg-background">
