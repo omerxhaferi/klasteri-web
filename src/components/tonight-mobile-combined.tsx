@@ -49,18 +49,18 @@ export function TonightMobileCombined({
 
     return (
         <div className="lg:hidden mb-4 -mx-4 px-4">
-            {/* Summary Player - standalone line above Në fokus */}
+            {/* Summary Player - standalone line above Titujt kryesor */}
             {summary && (
                 <div className="mb-2">
                     <SummaryPlayerCard summary={summary} />
                 </div>
             )}
 
-            {/* "Në fokus" header */}
+            {/* "Titujt kryesor" header */}
             <div className="flex items-center gap-1.5 mb-2">
                 <Sparkles className="h-3 w-3 text-muted-foreground/50" />
                 <h2 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
-                    Në fokus
+                    Titujt kryesor
                 </h2>
             </div>
 

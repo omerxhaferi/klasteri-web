@@ -44,7 +44,7 @@ export function TonightMobile({ clusters, serverIsNight, forceShow = false }: To
             {/* Header */}
             <div className="flex items-center justify-between mb-3">
                 <div>
-                    <h2 className="text-sm font-bold text-foreground">Në fokus</h2>
+                    <h2 className="text-sm font-bold text-foreground">Titujt kryesor</h2>
                     <p className="text-xs text-muted-foreground">Temat më të ndjekura</p>
                 </div>
             </div>
