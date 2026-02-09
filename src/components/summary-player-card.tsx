@@ -17,9 +17,9 @@ function getSummaryTimeLabel(createdAt: string): string {
     } else if (hour >= 14 && hour <= 16) {
         displayHour = 15;
     } else if (hour >= 17 && hour <= 20) {
-        displayHour = 19;
+        displayHour = 18;
     } else {
-        displayHour = 23;
+        displayHour = 22;
     }
 
     let label = `Lajmet e orës ${displayHour}`;
@@ -293,7 +293,7 @@ export function SummaryPlayerCard({ summary }: SummaryPlayerCardProps) {
 
             {/* Summary Text Modal - portaled to body to escape stacking contexts */}
             {isModalOpen && createPortal(
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-9999 flex items-center justify-center p-4">
                     <div
                         className="absolute inset-0 bg-background/80 backdrop-blur-sm"
                         onClick={handleModalClose}
