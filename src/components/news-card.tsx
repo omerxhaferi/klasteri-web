@@ -42,10 +42,26 @@ function isRecentArticle(dateString: string): boolean {
 
 export function NewsCard({ cluster }: NewsCardProps) {
     const mainArticle = cluster.articles[0];
-    const otherSources = cluster.articles.slice(1, 4); // Show top 3 similar news
-    const remainingCount = cluster.article_count > 4 ? cluster.article_count - 4 : 0;
-
     if (!mainArticle) return null;
+
+    // Top 3 other articles get full display (source + title)
+    const fullArticles = cluster.articles.slice(1, 4);
+
+    // Remaining articles: show up to 6 unique source names inline
+    const MAX_INLINE = 6;
+    const inlineSources: { name: string; url: string }[] = [];
+    const seenInline = new Set<string>();
+    for (const a of cluster.articles.slice(4)) {
+        if (inlineSources.length >= MAX_INLINE) break;
+        if (!seenInline.has(a.source_name)) {
+            seenInline.add(a.source_name);
+            inlineSources.push({ name: a.source_name, url: a.url });
+        }
+    }
+
+    const mobileInlineCount = Math.min(inlineSources.length, 5);
+    const desktopRemainingCount = Math.max(0, cluster.article_count - 4 - inlineSources.length);
+    const mobileRemainingCount = Math.max(0, cluster.article_count - 4 - mobileInlineCount);
 
     const [mounted, setMounted] = useState(false);
     useEffect(() => setMounted(true), []);
@@ -57,19 +73,17 @@ export function NewsCard({ cluster }: NewsCardProps) {
     const categoryKey = (cluster.category?.toLowerCase() || "vendi") as CategoryKey;
     const categoryColor = CategoryColors[categoryKey] || CategoryColors.vendi;
 
-    // Use explicit source color if available, otherwise fallback to category color
     const baseSourceColor = SOURCE_COLORS[mainArticle.source_name] || categoryColor;
     const mainSourceColor = getAccessibleColor(baseSourceColor, isDarkMode);
     const similarSourceColor = getAccessibleColor('#3b82f6', isDarkMode);
 
-    // Get description - add ellipsis if it looks truncated
     const description = mainArticle.content
         ? (mainArticle.content.length >= 200 ? mainArticle.content.slice(0, 200) + "..." : mainArticle.content)
         : "";
 
     return (
         <article className="py-5 border-b border-border last:border-b-0 transition-colors">
-            {/* Top Section: Everything grouped next to Thumbnail */}
+            {/* Top Section: Title + image */}
             <div className="flex gap-5 mb-4">
                 <div className="flex-1 min-w-0">
                     <a
@@ -83,14 +97,12 @@ export function NewsCard({ cluster }: NewsCardProps) {
                         </h3>
                     </a>
 
-                    {/* Description - Inside the same column as title */}
                     {description && (
                         <p className="hidden md:block mb-2 text-[14px] text-muted-foreground leading-relaxed line-clamp-2">
                             {description}
                         </p>
                     )}
 
-                    {/* Source info - Also grouped on the left */}
                     {(() => {
                         const timeInfo = getTimeAgo(mainArticle.crawled_at);
                         return (
@@ -134,10 +146,10 @@ export function NewsCard({ cluster }: NewsCardProps) {
                 )}
             </div>
 
-            {/* Other sources covering this story - Full Width below the top section */}
-            {otherSources.length > 0 && (
-                <div className="space-y-1.5 mb-3">
-                    {otherSources.map((article) => {
+            {/* Full articles: source + title (top 2 other articles) */}
+            {fullArticles.length > 0 && (
+                <div className="space-y-1.5 mb-2">
+                    {fullArticles.map((article) => {
                         const isRecent = isRecentArticle(article.crawled_at);
                         return (
                             <a
@@ -165,13 +177,43 @@ export function NewsCard({ cluster }: NewsCardProps) {
                 </div>
             )}
 
-            {remainingCount > 0 && (
+            {/* Inline source names (single line) */}
+            {inlineSources.length > 0 && (
+                <div className="text-[13px] mt-1 overflow-hidden whitespace-nowrap truncate" style={{ color: isDarkMode ? '#2dd4bf' : '#0d9488' }}>
+                    {inlineSources.map((src, i) => (
+                        <span key={src.name} className={i >= 5 ? "hidden md:inline" : undefined}>
+                            <a
+                                href={src.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="font-semibold hover:underline"
+                            >
+                                {src.name}
+                            </a>
+                            {i < inlineSources.length - 1 && (
+                                <span className={`text-muted-foreground${i === 4 && inlineSources.length > 5 ? " hidden md:inline" : ""}`}> - </span>
+                            )}
+                        </span>
+                    ))}
+                </div>
+            )}
+
+            {mobileRemainingCount > 1 && (
                 <Link
                     href={`/cluster/${cluster.id}`}
-                    className="text-[13px] font-semibold text-foreground hover:underline flex items-center gap-0.5"
+                    className={`text-[13px] font-semibold text-foreground hover:underline items-center gap-0.5 mt-1 ${mobileRemainingCount !== desktopRemainingCount ? "flex md:hidden" : "flex"}`}
                 >
-                    {remainingCount} lajme tjera
-                    <span className="text-[10px]">›</span>
+                    {mobileRemainingCount} lajme tjera
+                    <span className="text-[10px]">&#8250;</span>
+                </Link>
+            )}
+            {mobileRemainingCount !== desktopRemainingCount && desktopRemainingCount > 1 && (
+                <Link
+                    href={`/cluster/${cluster.id}`}
+                    className="text-[13px] font-semibold text-foreground hover:underline hidden md:flex items-center gap-0.5 mt-1"
+                >
+                    {desktopRemainingCount} lajme tjera
+                    <span className="text-[10px]">&#8250;</span>
                 </Link>
             )}
 
