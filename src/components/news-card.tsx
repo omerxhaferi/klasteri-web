@@ -59,9 +59,8 @@ export function NewsCard({ cluster }: NewsCardProps) {
         }
     }
 
-    const mobileInlineCount = Math.min(inlineSources.length, 5);
     const desktopRemainingCount = Math.max(0, cluster.article_count - 4 - inlineSources.length);
-    const mobileRemainingCount = Math.max(0, cluster.article_count - 4 - mobileInlineCount);
+    const mobileRemainingCount = Math.max(0, cluster.article_count - 4);
 
     const [mounted, setMounted] = useState(false);
     useEffect(() => setMounted(true), []);
@@ -148,7 +147,7 @@ export function NewsCard({ cluster }: NewsCardProps) {
 
             {/* Full articles: source + title (top 2 other articles) */}
             {fullArticles.length > 0 && (
-                <div className="space-y-1.5 mb-2">
+                <div className="space-y-1 mb-2">
                     {fullArticles.map((article) => {
                         const isRecent = isRecentArticle(article.crawled_at);
                         return (
@@ -179,9 +178,9 @@ export function NewsCard({ cluster }: NewsCardProps) {
 
             {/* Inline source names (single line) */}
             {inlineSources.length > 0 && (
-                <div className="text-[13px] mt-1 overflow-hidden whitespace-nowrap truncate" style={{ color: '#0f9a8fff' }}>
+                <div className="hidden md:block text-[13px] overflow-hidden whitespace-nowrap truncate" style={{ color: '#0d9489f9' }}>
                     {inlineSources.map((src, i) => (
-                        <span key={src.name} className={i >= 5 ? "hidden md:inline" : undefined}>
+                        <span key={src.name}>
                             <a
                                 href={src.url}
                                 target="_blank"
@@ -191,7 +190,7 @@ export function NewsCard({ cluster }: NewsCardProps) {
                                 {src.name}
                             </a>
                             {i < inlineSources.length - 1 && (
-                                <span className={`text-muted-foreground${i === 4 && inlineSources.length > 5 ? " hidden md:inline" : ""}`}> - </span>
+                                <span className="text-muted-foreground"> - </span>
                             )}
                         </span>
                     ))}
@@ -201,13 +200,13 @@ export function NewsCard({ cluster }: NewsCardProps) {
             {mobileRemainingCount > 1 && (
                 <Link
                     href={`/cluster/${cluster.id}`}
-                    className={`text-[13px] font-semibold text-foreground hover:underline items-center gap-0.5 mt-1 ${mobileRemainingCount !== desktopRemainingCount ? "flex md:hidden" : "flex"}`}
+                    className="text-[13px] font-semibold text-foreground hover:underline flex md:hidden items-center gap-0.5 mt-1"
                 >
                     {mobileRemainingCount} lajme tjera
                     <span className="text-[10px]">&#8250;</span>
                 </Link>
             )}
-            {mobileRemainingCount !== desktopRemainingCount && desktopRemainingCount > 1 && (
+            {desktopRemainingCount > 1 && (
                 <Link
                     href={`/cluster/${cluster.id}`}
                     className="text-[13px] font-semibold text-foreground hover:underline hidden md:flex items-center gap-0.5 mt-1"
