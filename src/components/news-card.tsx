@@ -179,7 +179,7 @@ export function NewsCard({ cluster }: NewsCardProps) {
 
             {/* Inline source names (single line) */}
             {inlineSources.length > 0 && (
-                <div className="text-[13px] mt-1 overflow-hidden whitespace-nowrap truncate" style={{ color: isDarkMode ? '#2dd4bf' : '#0d9488' }}>
+                <div className="text-[13px] mt-1 overflow-hidden whitespace-nowrap truncate" style={{ color: '#0f9a8fff' }}>
                     {inlineSources.map((src, i) => (
                         <span key={src.name} className={i >= 5 ? "hidden md:inline" : undefined}>
                             <a

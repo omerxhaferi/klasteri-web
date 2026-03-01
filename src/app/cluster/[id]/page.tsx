@@ -4,6 +4,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { getCluster } from "@/lib/api";
 import { CategoryKey } from "@/lib/constants";
+import { BackButton } from "@/components/back-button";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -60,13 +61,7 @@ export default async function ClusterPage({
 
             <main className="max-w-2xl mx-auto px-4 py-8">
                 {/* Back Button */}
-                <Link
-                    href="/"
-                    className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors group"
-                >
-                    <ChevronLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-                    Kthehu
-                </Link>
+                <BackButton />
 
                 <ClusterDetailContent
                     mainArticle={mainArticle}
