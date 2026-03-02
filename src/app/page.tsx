@@ -112,14 +112,6 @@ export default async function Home({
         serverIsNight={tonightData.is_active_hours}
         forceShow={previewSummary}
       >
-        {/* Mobile Combined Section - Tonight Focus + Summary Player */}
-        <TonightMobileCombined
-          clusters={tonightClusters}
-          summary={dailySummary}
-          serverIsNight={tonightData.is_active_hours}
-          forceShow={previewSummary}
-        />
-
         {error && (
           <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-600 dark:text-red-400 text-sm font-medium">
             {error}
@@ -140,6 +132,13 @@ export default async function Home({
             {selectedCategory === "all" ? (
               <>
                 <CategorySection title="Top Lajmet" clusters={homepageData.top_overall} color={CategoryColors.top_overall} hideTitle={true} />
+                {/* Mobile Combined Section - Tonight Focus + Summary Player */}
+                <TonightMobileCombined
+                  clusters={tonightClusters}
+                  summary={dailySummary}
+                  serverIsNight={tonightData.is_active_hours}
+                  forceShow={previewSummary}
+                />
                 <CategorySection title="Vendi" clusters={homepageData.vendi} color={CategoryColors.vendi} />
                 <CategorySection title="Rajoni" clusters={homepageData.rajoni} color={CategoryColors.rajoni} />
                 <CategorySection title="Bota" clusters={homepageData.bota} color={CategoryColors.bota} />
