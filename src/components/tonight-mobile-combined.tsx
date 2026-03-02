@@ -45,17 +45,21 @@ export function TonightMobileCombined({
 }: TonightMobileCombinedProps) {
     const isDarkMode = useIsDarkMode();
 
-    if (clusters.length === 0) return null;
+    const showSummary = !!summary;
+    const showClusters = clusters.length > 0;
+
+    if (!showSummary && !showClusters) return null;
 
     return (
         <div className="lg:hidden mb-4 -mx-4 px-4">
             {/* Summary Player - standalone line above Titujt kryesor */}
-            {summary && (
+            {showSummary && (
                 <div className="mb-2">
                     <SummaryPlayerCard summary={summary} />
                 </div>
             )}
 
+            {showClusters && <>
             {/* "Titujt kryesor" header */}
             <div className="flex items-center gap-1.5 mb-2">
                 <Sparkles className="h-3 w-3 text-muted-foreground/50" />
@@ -115,6 +119,7 @@ export function TonightMobileCombined({
                     );
                 })}
             </div>
+            </>}
         </div>
     );
 }
