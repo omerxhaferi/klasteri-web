@@ -66,6 +66,8 @@ export default async function ClusterPage({
                 <ClusterDetailContent
                     mainArticle={mainArticle}
                     otherArticles={otherArticles}
+                    allArticles={cluster.articles}
+                    beats={cluster.beats}
                     articleCount={cluster.article_count}
                     categoryKey={categoryKey}
                 />

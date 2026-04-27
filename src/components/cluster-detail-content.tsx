@@ -1,10 +1,11 @@
 "use client";
 
-import type { Article } from "@/lib/api";
+import type { Article, Beat } from "@/lib/api";
 import { SOURCE_COLORS, CategoryColors, CategoryKey } from "@/lib/constants";
 import { getAccessibleColor } from "@/lib/utils";
 import { ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
+import { ClusterTimeline } from "@/components/cluster-timeline";
 
 function getTimeAgo(dateString: string): string {
     const now = new Date();
@@ -24,6 +25,8 @@ function getTimeAgo(dateString: string): string {
 type ClusterDetailContentProps = {
     mainArticle: Article | undefined;
     otherArticles: Article[];
+    allArticles: Article[];
+    beats?: Beat[];
     articleCount: number;
     categoryKey: CategoryKey;
 };
@@ -31,6 +34,8 @@ type ClusterDetailContentProps = {
 export function ClusterDetailContent({
     mainArticle,
     otherArticles,
+    allArticles,
+    beats,
     articleCount,
     categoryKey,
 }: ClusterDetailContentProps) {
@@ -99,6 +104,11 @@ export function ClusterDetailContent({
                         </a>
                     </div>
                 </div>
+            )}
+
+            {/* Story timeline (only renders if there are 2+ beats) */}
+            {beats && beats.length > 1 && (
+                <ClusterTimeline beats={beats} articles={allArticles} />
             )}
 
             {/* Other Articles List */}

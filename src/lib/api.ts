@@ -9,6 +9,15 @@ export interface Article {
     rank_score?: number;
 }
 
+export interface Beat {
+    anchor_article_id: number;
+    copy_article_ids: number[];
+    type: 'break' | 'update';
+    label: string;
+    timestamp: string;
+    source_ids: number[];
+}
+
 export interface Cluster {
     id: number;
     title: string;
@@ -17,6 +26,7 @@ export interface Cluster {
     score: number;
     last_updated: string;
     articles: Article[];
+    beats?: Beat[];
 }
 
 export interface HomePageData {
