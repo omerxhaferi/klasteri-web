@@ -9,16 +9,9 @@ interface MainContentWrapperProps {
     forceShow?: boolean;
 }
 
-export function MainContentWrapper({
-    children,
-    hasTonightClusters,
-    serverIsNight,
-    forceShow = false
-}: MainContentWrapperProps) {
-    const leftSidebarVisible = hasTonightClusters;
-
+export function MainContentWrapper({ children }: MainContentWrapperProps) {
     return (
-        <main className={`mx-auto px-4 py-6 transition-all duration-300 ${leftSidebarVisible ? 'max-w-7xl' : 'max-w-6xl'}`}>
+        <main className="max-w-7xl mx-auto px-4 py-6 md:py-8">
             {children}
         </main>
     );

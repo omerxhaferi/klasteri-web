@@ -42,7 +42,7 @@ export default async function ClusterPage({
                 <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2">
                         <Logo width={32} height={32} />
-                        <span className="text-xl font-bold tracking-tight hidden sm:inline">Klasteri</span>
+                        <span className="font-serif text-[22px] font-bold tracking-tight hidden sm:inline">Klasteri</span>
                     </Link>
 
                     {/* Total Articles Count (Mobile Style) */}

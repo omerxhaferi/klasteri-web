@@ -4,8 +4,10 @@ import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SearchBar } from "@/components/search-bar";
+import { CategoryColors, CategoryKey } from "@/lib/constants";
+
 const CATEGORIES = [
-  { key: "top_overall", label: "Top Lajmet", href: "/" },
+  { key: "top_overall", label: "Kryesore", href: "/" },
   { key: "vendi", label: "Vendi", href: "/?category=vendi" },
   { key: "rajoni", label: "Rajoni", href: "/?category=rajoni" },
   { key: "bota", label: "Bota", href: "/?category=bota" },
@@ -20,72 +22,78 @@ interface SiteHeaderProps {
   forceShow?: boolean;
 }
 
-export function SiteHeader({
-  selectedCategory,
-  hasTonightClusters = false,
-  serverIsNight = false,
-  forceShow = false
-}: SiteHeaderProps) {
-  const leftSidebarVisible = hasTonightClusters;
+const WEEKDAYS_SQ = ["E diel", "E hënë", "E martë", "E mërkurë", "E enjte", "E premte", "E shtunë"];
+const MONTHS_SQ = ["janar", "shkurt", "mars", "prill", "maj", "qershor", "korrik", "gusht", "shtator", "tetor", "nëntor", "dhjetor"];
 
-  // Match the main content width
-  const maxWidthClass = leftSidebarVisible ? 'max-w-7xl' : 'max-w-6xl';
+export function SiteHeader({ selectedCategory }: SiteHeaderProps) {
+  const now = new Date();
+  const today = `${WEEKDAYS_SQ[now.getDay()]}, ${now.getDate()} ${MONTHS_SQ[now.getMonth()]} ${now.getFullYear()}`;
 
   return (
     <>
-      <header className="border-b border-border bg-card sticky top-0 z-50">
-        <div className={`${maxWidthClass} mx-auto px-4 transition-all duration-300`}>
-          <div className="h-14 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <Logo width={32} height={32} />
-              <span className="text-xl font-bold tracking-tight">Klasteri</span>
-            </Link>
-            <nav className="flex items-center gap-1 md:gap-2">
-              <div className="hidden md:flex items-center gap-1">
-                {CATEGORIES.map((cat) => (
-                  <Link
-                    key={cat.key}
-                    href={cat.href}
-                    className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${(selectedCategory === "all" && cat.key === "top_overall") ||
-                        selectedCategory === cat.key
-                        ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-blue-400"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                      }`}
-                  >
-                    {cat.label}
-                  </Link>
-                ))}
-              </div>
-              <div className="h-6 w-px bg-border mx-2 hidden md:block" />
-              <SearchBar />
-              <div className="h-6 w-px bg-border mx-2 hidden md:block" />
-              <ThemeToggle />
-            </nav>
-          </div>
-        </div>
-      </header>
+      {/* Masthead */}
+      <div className="bg-background">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="relative h-16 md:h-20 flex items-center justify-between">
+            <p
+              className="hidden lg:block text-[12.5px] text-muted-foreground"
+              suppressHydrationWarning
+            >
+              {today}
+            </p>
 
-      {/* Mobile Category Pills - only show when we have a selected category (home) */}
-      {selectedCategory !== undefined && (
-        <div className="md:hidden border-b border-border bg-card overflow-x-auto">
-          <div className="flex gap-2 px-4 py-3">
-            {CATEGORIES.map((cat) => (
-              <Link
-                key={cat.key}
-                href={cat.href}
-                className={`px-3 py-1.5 text-sm font-medium rounded-full whitespace-nowrap transition-colors ${(selectedCategory === "all" && cat.key === "top_overall") ||
-                    selectedCategory === cat.key
-                    ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-blue-400"
-                    : "bg-muted text-muted-foreground"
-                  }`}
-              >
-                {cat.label}
-              </Link>
-            ))}
+            <Link
+              href="/"
+              className="flex items-center gap-2.5 lg:absolute lg:left-1/2 lg:-translate-x-1/2 hover:no-underline"
+            >
+              <Logo width={34} height={34} />
+              <span className="font-serif text-[26px] md:text-[30px] font-bold tracking-tight leading-none">
+                Klasteri
+              </span>
+            </Link>
+
+            <div className="flex items-center gap-2">
+              <SearchBar />
+              <ThemeToggle />
+            </div>
           </div>
         </div>
-      )}
+      </div>
+
+      {/* Sticky category nav */}
+      <nav className="sticky top-0 z-50 border-y border-border bg-background/90 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-stretch justify-start md:justify-center gap-1 overflow-x-auto scrollbar-hide h-11">
+            {CATEGORIES.map((cat) => {
+              const isActive =
+                (selectedCategory === "all" && cat.key === "top_overall") ||
+                selectedCategory === cat.key;
+              const color =
+                CategoryColors[cat.key as CategoryKey] || "var(--primary)";
+
+              return (
+                <Link
+                  key={cat.key}
+                  href={cat.href}
+                  className={`relative flex items-center px-3.5 text-[12.5px] font-semibold uppercase tracking-[0.08em] whitespace-nowrap transition-colors hover:no-underline ${
+                    isActive
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {cat.label}
+                  {isActive && (
+                    <span
+                      className="absolute left-2 right-2 bottom-0 h-[2.5px] rounded-t-full"
+                      style={{ backgroundColor: color }}
+                    />
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </nav>
     </>
   );
 }
-

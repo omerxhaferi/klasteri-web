@@ -4,7 +4,7 @@ import { DailySummary, TonightCluster } from "@/lib/api";
 import { CategoryColors, CategoryKey, SOURCE_COLORS } from "@/lib/constants";
 import { getAccessibleColor } from "@/lib/utils";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { SummaryPlayerCard } from "@/components/summary-player-card";
 
 interface TonightSidebarProps {
@@ -29,94 +29,89 @@ function formatTime(dateString: string): string {
     return isYesterday ? `Dje ${time}` : time;
 }
 
-export function TonightSidebar({ clusters, summary, serverIsNight, forceShow = false }: TonightSidebarProps) {
-    const [mounted, setMounted] = useState(false);
+const subscribe = () => () => {};
 
-    useEffect(() => {
-        setMounted(true);
-    }, []);
+export function TonightSidebar({ clusters, summary }: TonightSidebarProps) {
+    const isDarkMode = useSyncExternalStore(
+        subscribe,
+        () => document.documentElement.classList.contains("dark"),
+        () => false
+    );
 
-    const isDarkMode = mounted && typeof document !== "undefined"
-        ? document.documentElement.classList.contains("dark")
-        : false;
-
-    if (clusters.length === 0) {
+    if (clusters.length === 0 && !summary) {
         return null;
     }
 
     return (
         <aside className="hidden lg:block w-[280px] shrink-0">
-            <div className="sticky top-20 h-[calc(100vh-6rem)] flex flex-col gap-2">
-                {/* Summary Player - standalone above the sidebar card */}
+            <div className="sticky top-[60px] max-h-[calc(100vh-4.5rem)] flex flex-col gap-4">
                 {summary && (
-                    <div className="px-1 shrink-0">
+                    <div className="shrink-0">
                         <SummaryPlayerCard summary={summary} />
                     </div>
                 )}
 
-                {/* Sidebar Card */}
-                <div className="bg-card rounded-xl border border-border overflow-hidden flex-1 min-h-0 flex flex-col">
-                    {/* Header */}
-                    <div className="px-4 py-3 border-b border-border shrink-0">
-                        <h2 className="text-foreground font-bold text-sm">Titujt kryesor</h2>
-                        <p className="text-muted-foreground text-xs mt-0.5">
-                            Temat më të ndjekura
-                        </p>
-                    </div>
+                {clusters.length > 0 && (
+                    <div className="flex flex-col min-h-0">
+                        <div className="flex items-baseline justify-between pb-2 border-b-2 border-foreground shrink-0">
+                            <h2 className="font-serif text-[19px] font-bold tracking-tight text-foreground">
+                                Titujt kryesor
+                            </h2>
+                            <span className="text-[11px] text-muted-foreground">
+                                më të ndjekurat
+                            </span>
+                        </div>
 
-                    {/* Cluster List - Scrollable */}
-                    <div className="divide-y divide-border overflow-y-auto flex-1">
-                        {clusters.map((cluster) => {
-                            const article = cluster.top_article;
-                            const categoryKey = (cluster.category?.toLowerCase() || "vendi") as CategoryKey;
-                            const baseColor = SOURCE_COLORS[article.source_name] || CategoryColors[categoryKey] || "#3b82f6";
-                            const sourceColor = getAccessibleColor(baseColor, isDarkMode);
+                        <ol className="divide-y divide-border overflow-y-auto min-h-0 scrollbar-hide">
+                            {clusters.map((cluster, index) => {
+                                const article = cluster.top_article;
+                                const categoryKey = (cluster.category?.toLowerCase() || "vendi") as CategoryKey;
+                                const baseColor = SOURCE_COLORS[article.source_name] || CategoryColors[categoryKey] || "#3b82f6";
+                                const sourceColor = getAccessibleColor(baseColor, isDarkMode);
 
-                            return (
-                                <div key={cluster.id} className="p-3 hover:bg-muted/50 transition-colors">
-                                    {/* Title */}
-                                    <a
-                                        href={article.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="block group"
-                                    >
-                                        <h3 className="text-[13px] font-semibold leading-snug text-foreground group-hover:underline decoration-1 line-clamp-2 mb-1.5">
-                                            {article.title}
-                                        </h3>
-                                    </a>
+                                return (
+                                    <li key={cluster.id} className="py-3 flex gap-3">
+                                        <span className="font-serif text-[24px] font-bold leading-none text-muted-foreground/35 w-7 text-right tabular-nums shrink-0 pt-0.5">
+                                            {index + 1}
+                                        </span>
 
-                                    {/* Source & Time */}
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-1.5 text-[11px]">
-                                            <span
-                                                className="font-bold uppercase"
-                                                style={{ color: sourceColor }}
+                                        <div className="min-w-0 flex-1">
+                                            <a
+                                                href={article.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="block group"
                                             >
-                                                {article.source_name}
-                                            </span>
-                                            <span className="text-muted-foreground">·</span>
-                                            <span className="text-muted-foreground">
-                                                {formatTime(article.crawled_at)}
-                                            </span>
+                                                <h3 className="text-[13px] font-semibold leading-snug text-foreground group-hover:underline decoration-1 line-clamp-2 mb-1">
+                                                    {article.title}
+                                                </h3>
+                                            </a>
+
+                                            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                                                <span className="font-bold uppercase" style={{ color: sourceColor }}>
+                                                    {article.source_name}
+                                                </span>
+                                                <span>·</span>
+                                                <span>{formatTime(article.crawled_at)}</span>
+                                                {cluster.total_article_count > 1 && (
+                                                    <>
+                                                        <span>·</span>
+                                                        <Link
+                                                            href={`/cluster/${cluster.id}`}
+                                                            className="hover:text-foreground hover:underline whitespace-nowrap"
+                                                        >
+                                                            {cluster.total_article_count} lajme ›
+                                                        </Link>
+                                                    </>
+                                                )}
+                                            </div>
                                         </div>
-
-                                        {/* Article count link */}
-                                        {cluster.total_article_count > 1 && (
-                                            <Link
-                                                href={`/cluster/${cluster.id}`}
-                                                className="text-[10px] text-primary hover:underline flex items-center gap-0.5"
-                                            >
-                                                {cluster.total_article_count} lajme
-                                                <span className="text-[8px]">›</span>
-                                            </Link>
-                                        )}
-                                    </div>
-                                </div>
-                            );
-                        })}
+                                    </li>
+                                );
+                            })}
+                        </ol>
                     </div>
-                </div>
+                )}
             </div>
         </aside>
     );

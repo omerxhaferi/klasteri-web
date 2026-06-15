@@ -8,9 +8,9 @@ export function SiteFooter() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <Logo width={24} height={24} />
-            <span className="font-semibold">Klasteri</span>
+            <span className="font-serif text-lg font-bold tracking-tight">Klasteri</span>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground font-serif italic">
             Lajmet, me rrënjë e degë
           </p>
           <div className="flex gap-6 text-sm text-muted-foreground">
