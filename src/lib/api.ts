@@ -156,6 +156,19 @@ export function getSummaryAudioUrl(summaryId?: number): string {
     return `${API_BASE_URL}/api/summary/today/audio`;
 }
 
+export interface SourceInfo {
+    name: string;
+    article_count: number;
+}
+
+export async function getSources(): Promise<SourceInfo[]> {
+    const res = await fetch(`${API_BASE_URL}/api/sources`, { cache: 'no-store' });
+    if (!res.ok) {
+        throw new Error('Failed to fetch sources');
+    }
+    return res.json();
+}
+
 export async function getDailySummary(): Promise<DailySummary | null> {
     const res = await fetch(`${API_BASE_URL}/api/summary/today`, {
         cache: 'no-store',

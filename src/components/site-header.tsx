@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Settings } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SearchBar } from "@/components/search-bar";
@@ -54,6 +55,13 @@ export function SiteHeader({ selectedCategory }: SiteHeaderProps) {
 
             <div className="flex items-center gap-2">
               <SearchBar />
+              <Link
+                href="/settings"
+                aria-label="Cilësimet"
+                className="flex items-center justify-center w-9 h-9 rounded-md hover:bg-muted transition-colors border border-border text-muted-foreground hover:text-foreground"
+              >
+                <Settings className="h-[1.1rem] w-[1.1rem]" />
+              </Link>
               <ThemeToggle />
             </div>
           </div>

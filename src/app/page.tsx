@@ -5,6 +5,8 @@ import { SiteFooter } from "@/components/site-footer";
 import { TonightSidebar } from "@/components/tonight-sidebar";
 import { TonightMobileCombined } from "@/components/tonight-mobile-combined";
 import { MainContentWrapper } from "@/components/main-content-wrapper";
+import { cookies } from "next/headers";
+import { MUTED_COOKIE, parseMutedCookie, applyMutesToClusters, applyMutesToTonight } from "@/lib/mutes";
 import Link from "next/link";
 
 const CATEGORIES = [
@@ -108,6 +110,21 @@ export default async function Home({
   } catch (e) {
     console.error("Failed to fetch news:", e);
     error = "Nuk mund të merren lajmet. Provoni përsëri më vonë.";
+  }
+
+  // Apply reader muted-publisher preferences (cookie) before render.
+  const muted = parseMutedCookie((await cookies()).get(MUTED_COOKIE)?.value);
+  if (muted.size > 0) {
+    homepageData = {
+      top_overall: applyMutesToClusters(homepageData.top_overall, muted),
+      vendi: applyMutesToClusters(homepageData.vendi, muted),
+      rajoni: applyMutesToClusters(homepageData.rajoni, muted),
+      bota: applyMutesToClusters(homepageData.bota, muted),
+      sport: applyMutesToClusters(homepageData.sport, muted),
+      tech: applyMutesToClusters(homepageData.tech, muted),
+    };
+    categoryData = applyMutesToClusters(categoryData, muted);
+    tonightData = { ...tonightData, clusters: applyMutesToTonight(tonightData.clusters, muted) };
   }
 
   // Backend already returns clusters sorted: today first (by article_count DESC),

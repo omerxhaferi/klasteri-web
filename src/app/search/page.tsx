@@ -2,6 +2,8 @@ import { searchNews, SearchResult } from "@/lib/api";
 import { NewsCard } from "@/components/news-card";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { cookies } from "next/headers";
+import { MUTED_COOKIE, parseMutedCookie, applyMutesToClusters } from "@/lib/mutes";
 import { Search } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
@@ -21,6 +23,11 @@ export default async function SearchPage({
     if (query.length >= 2) {
         try {
             searchResult = await searchNews(query);
+            const muted = parseMutedCookie((await cookies()).get(MUTED_COOKIE)?.value);
+            if (muted.size > 0 && searchResult) {
+                const clusters = applyMutesToClusters(searchResult.clusters, muted);
+                searchResult = { ...searchResult, clusters, total_count: clusters.length };
+            }
         } catch (e) {
             console.error("Failed to search news:", e);
             error = "Nuk mund të kërkohen lajmet. Provoni përsëri më vonë.";
