@@ -4,6 +4,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { TonightSidebar } from "@/components/tonight-sidebar";
 import { TonightMobileCombined } from "@/components/tonight-mobile-combined";
+import { AppDownloadBanner } from "@/components/app-download-banner";
 import { MainContentWrapper } from "@/components/main-content-wrapper";
 import { cookies } from "next/headers";
 import { MUTED_COOKIE, parseMutedCookie, applyMutesToClusters, applyMutesToTonight } from "@/lib/mutes";
@@ -153,6 +154,9 @@ export default async function Home({
           serverIsNight={tonightData.is_active_hours}
           forceShow={previewSummary}
         />
+
+        {/* Mobile-only install prompt (dismissible); desktop gets footer links */}
+        <AppDownloadBanner />
 
         {error && (
           <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-600 dark:text-red-400 text-sm font-medium">

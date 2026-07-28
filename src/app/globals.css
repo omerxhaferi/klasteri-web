@@ -40,6 +40,10 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --color-primary: var(--primary);
+  /* Without this token `text-primary-foreground` is a no-op class, so text on
+     a bg-primary button falls back to --foreground: dark ink on navy in light
+     mode. Also fixes the mobile search submit button, which already used it. */
+  --color-primary-foreground: var(--primary-foreground);
   --color-accent: var(--accent);
   --color-hot: var(--hot);
   --font-sans: 'Inter', system-ui, sans-serif;

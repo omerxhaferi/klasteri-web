@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
+import { StoreButtons } from "@/components/store-badges";
 
 export function SiteFooter() {
   return (
@@ -19,6 +20,13 @@ export function SiteFooter() {
             <Link href="/contact" className="hover:text-foreground">Kontakt</Link>
           </div>
         </div>
+        <div className="mt-6 pt-6 border-t border-border flex flex-col items-center gap-3">
+          <p className="text-sm text-muted-foreground">
+            Klasteri edhe në telefon
+          </p>
+          <StoreButtons variant="quiet" />
+        </div>
+
         <div className="mt-6 pt-6 border-t border-border text-center text-xs text-muted-foreground">
           © {new Date().getFullYear()} Klasteri. Të gjitha të drejtat të rezervuara.
         </div>
