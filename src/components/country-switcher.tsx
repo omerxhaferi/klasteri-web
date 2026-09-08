@@ -93,10 +93,28 @@ export function CountrySwitcher() {
             </button>
 
             {open && (
+                /*
+                 * z-[60], not z-50, and that is the whole bug fix.
+                 *
+                 * The category bar below the header is `sticky top-0 z-50`. This menu
+                 * was also z-50, nothing between them creates a stacking context, and
+                 * equal z-index is resolved by DOM ORDER — the nav comes later, so it
+                 * painted over the top of this menu and swallowed the clicks landing
+                 * there.
+                 *
+                 * Only the FIRST option sits in that band, which made the symptom
+                 * oddly specific: Kosova and Shqiperia worked, and Maqedonia — always
+                 * first, being the default — could never be chosen again once you had
+                 * left it.
+                 *
+                 * whitespace-nowrap and the wider min-width go together: "Maqedonia e
+                 * Veriut" wrapped to two lines at 11rem, making that row 56px tall
+                 * against the others' 36px.
+                 */
                 <div
                     role="listbox"
                     aria-label="Zgjidh shtetin"
-                    className="absolute right-0 z-50 mt-1 min-w-[11rem] overflow-hidden rounded-lg
+                    className="absolute right-0 z-[60] mt-1 min-w-[12.5rem] overflow-hidden rounded-lg
                                border border-foreground/10 bg-background shadow-lg"
                 >
                     {COUNTRIES.map((c) => (
@@ -106,8 +124,8 @@ export function CountrySwitcher() {
                             role="option"
                             aria-selected={c.code === current}
                             onClick={() => choose(c.code)}
-                            className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm
-                                        transition-colors hover:bg-foreground/5
+                            className={`flex w-full items-center gap-2 whitespace-nowrap px-3 py-2
+                                        text-left text-sm transition-colors hover:bg-foreground/5
                                         ${c.code === current ? 'font-semibold' : 'text-foreground/80'}`}
                         >
                             <span aria-hidden>{c.flag}</span>
