@@ -1,3 +1,5 @@
+import { getActiveCountry, withCountry } from '@/lib/country';
+
 export interface Article {
     id: number;
     title: string;
@@ -64,8 +66,20 @@ export interface TonightData {
 const rawUrl = process.env.NEXT_PUBLIC_API_URL || 'https://clusta-8d555484de44.herokuapp.com';
 const API_BASE_URL = rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`;
 
+/**
+ * Build an API URL scoped to the reader's chosen edition.
+ *
+ * Every request goes through this, deliberately. Adding `country=` at each call
+ * site would work until someone adds the thirteenth endpoint and forgets — and
+ * the failure is silent: that one endpoint keeps serving Macedonian news while
+ * the rest of the page shows Kosovo.
+ */
+async function apiUrl(path: string): Promise<string> {
+    return `${API_BASE_URL}${withCountry(path, await getActiveCountry())}`;
+}
+
 export async function getNews(): Promise<HomePageData> {
-    const res = await fetch(`${API_BASE_URL}/api/news`, {
+    const res = await fetch(await apiUrl(`/api/news`), {
         cache: 'no-store',
     });
 
@@ -77,7 +91,7 @@ export async function getNews(): Promise<HomePageData> {
 }
 
 export async function getNewsByCategory(category: string): Promise<Cluster[]> {
-    const res = await fetch(`${API_BASE_URL}/api/news/${category}`, {
+    const res = await fetch(await apiUrl(`/api/news/${category}`), {
         cache: 'no-store',
     });
 
@@ -89,7 +103,7 @@ export async function getNewsByCategory(category: string): Promise<Cluster[]> {
 }
 
 export async function getCluster(id: string): Promise<Cluster> {
-    const res = await fetch(`${API_BASE_URL}/api/clusters/${id}`, {
+    const res = await fetch(await apiUrl(`/api/clusters/${id}`), {
         cache: 'no-store',
     });
 
@@ -105,7 +119,7 @@ export async function getTonightNews(excludeIds: number[] = []): Promise<Tonight
         ? `?exclude_ids=${excludeIds.join(',')}`
         : '';
 
-    const res = await fetch(`${API_BASE_URL}/api/news/tonight${params}`, {
+    const res = await fetch(await apiUrl(`/api/news/tonight${params}`), {
         cache: 'no-store',
     });
 
@@ -128,7 +142,7 @@ export async function searchNews(query: string, limit = 20): Promise<SearchResul
         limit: limit.toString(),
     });
 
-    const res = await fetch(`${API_BASE_URL}/api/search?${params}`, {
+    const res = await fetch(await apiUrl(`/api/search?${params}`), {
         cache: 'no-store',
     });
 
@@ -162,7 +176,7 @@ export interface SourceInfo {
 }
 
 export async function getSources(): Promise<SourceInfo[]> {
-    const res = await fetch(`${API_BASE_URL}/api/sources`, { cache: 'no-store' });
+    const res = await fetch(await apiUrl(`/api/sources`), { cache: 'no-store' });
     if (!res.ok) {
         throw new Error('Failed to fetch sources');
     }
@@ -170,7 +184,7 @@ export async function getSources(): Promise<SourceInfo[]> {
 }
 
 export async function getDailySummary(): Promise<DailySummary | null> {
-    const res = await fetch(`${API_BASE_URL}/api/summary/today`, {
+    const res = await fetch(await apiUrl(`/api/summary/today`), {
         cache: 'no-store',
     });
 

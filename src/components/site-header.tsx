@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Settings } from "lucide-react";
 import { Logo } from "@/components/logo";
+import { CountrySwitcher } from "@/components/country-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SearchBar } from "@/components/search-bar";
 import { CategoryColors, CategoryKey } from "@/lib/constants";
@@ -54,6 +55,7 @@ export function SiteHeader({ selectedCategory }: SiteHeaderProps) {
             </Link>
 
             <div className="flex items-center gap-2">
+              <CountrySwitcher />
               <SearchBar />
               <Link
                 href="/settings"
