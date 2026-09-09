@@ -9,6 +9,7 @@
  * without any client-side refetch plumbing.
  */
 
+import { CountryMark } from '@/components/country-mark';
 import {
     COUNTRIES,
     COUNTRY_COOKIE,
@@ -83,7 +84,14 @@ export function CountrySwitcher() {
                            text-foreground/80 transition-colors hover:bg-foreground/5
                            hover:text-foreground disabled:opacity-50"
             >
-                <span aria-hidden>{active.flag}</span>
+                {/*
+                 * Deliberately unnamed. The button already carries
+                 * aria-label="Shteti: …", which replaces its entire subtree for
+                 * assistive tech — a name on the mark would be discarded, and
+                 * on narrow screens where `active.short` is display:none that
+                 * aria-label is the only name the control has.
+                 */}
+                <CountryMark code={active.code} size={18} className="shrink-0" />
                 <span className="hidden sm:inline">{active.short}</span>
                 <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden
                      className={`transition-transform ${open ? 'rotate-180' : ''}`}>
@@ -128,7 +136,12 @@ export function CountrySwitcher() {
                                         text-left text-sm transition-colors hover:bg-foreground/5
                                         ${c.code === current ? 'font-semibold' : 'text-foreground/80'}`}
                         >
-                            <span aria-hidden>{c.flag}</span>
+                            {/*
+                             * Also unnamed: `c.label` on the next line is always
+                             * rendered, so naming the mark would make every
+                             * option announce its country twice.
+                             */}
+                            <CountryMark code={c.code} size={18} className="shrink-0" />
                             <span className="flex-1">{c.label}</span>
                             {c.code === current && (
                                 <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>

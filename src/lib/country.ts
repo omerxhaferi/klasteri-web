@@ -12,10 +12,19 @@
  * Macedonia and then swapping.
  */
 
+/**
+ * Text only. There is deliberately no `flag` here any more: the emoji it used
+ * to hold could not be rendered consistently — 🇽🇰 is not a real Unicode flag,
+ * because XK is a user-assigned code rather than an ISO country, so most
+ * Android builds and several Windows browsers drew it as the letters "XK" next
+ * to two proper flags. The switcher draws `components/country-mark.tsx`
+ * instead, which also keeps the artwork out of this module: `lib/api.ts`
+ * imports it on the server, and nothing here should pull in React.
+ */
 export const COUNTRIES = [
-    { code: 'MK', label: 'Maqedonia e Veriut', short: 'Maqedoni', flag: '🇲🇰' },
-    { code: 'KS', label: 'Kosova', short: 'Kosovë', flag: '🇽🇰' },
-    { code: 'AL', label: 'Shqipëria', short: 'Shqipëri', flag: '🇦🇱' },
+    { code: 'MK', label: 'Maqedonia e Veriut', short: 'Maqedoni' },
+    { code: 'KS', label: 'Kosova', short: 'Kosovë' },
+    { code: 'AL', label: 'Shqipëria', short: 'Shqipëri' },
 ] as const;
 
 export type CountryCode = (typeof COUNTRIES)[number]['code'];
