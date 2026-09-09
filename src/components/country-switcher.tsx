@@ -88,11 +88,11 @@ export function CountrySwitcher() {
                  * Deliberately unnamed. The button already carries
                  * aria-label="Shteti: …", which replaces its entire subtree for
                  * assistive tech — a name on the mark would be discarded, and
-                 * on narrow screens where `active.short` is display:none that
+                 * on narrow screens where `active.label` is display:none that
                  * aria-label is the only name the control has.
                  */}
                 <CountryMark code={active.code} size={18} className="shrink-0" />
-                <span className="hidden sm:inline">{active.short}</span>
+                <span className="hidden sm:inline">{active.label}</span>
                 <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden
                      className={`transition-transform ${open ? 'rotate-180' : ''}`}>
                     <path d="M1 3l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5"

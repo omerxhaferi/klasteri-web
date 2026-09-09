@@ -28,9 +28,9 @@
  * which is unaffected and stays MK.
  */
 export const COUNTRIES = [
-    { code: 'AL', label: 'Shqipëria', short: 'Shqipëri' },
-    { code: 'KS', label: 'Kosova', short: 'Kosovë' },
-    { code: 'MK', label: 'Maqedonia e Veriut', short: 'Maqedoni' },
+    { code: 'AL', label: 'Shqipëri' },
+    { code: 'KS', label: 'Kosovë' },
+    { code: 'MK', label: 'Maqedoni' },
 ] as const;
 
 export type CountryCode = (typeof COUNTRIES)[number]['code'];
