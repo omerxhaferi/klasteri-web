@@ -1,0 +1,262 @@
+/**
+ * The feed. One implementation, three routes.
+ *
+ *   /              — edition from the cookie (the deployed homepage)
+ *   /mk            — edition from the URL
+ *   /mk/vendi      — edition and category from the URL
+ *
+ * Everything that made the homepage what it is lives here — the tonight
+ * de-duplication, the daily summary, the muted-publisher cookie, the sidebars —
+ * so the country routes cannot end up a stale copy of it. The two things a
+ * route decides for itself are which edition to fetch (`country`) and how its
+ * links should be spelled (`base`, see lib/routes.ts).
+ */
+
+import {
+    getNews,
+    getNewsByCategory,
+    getTonightNews,
+    getDailySummary,
+    Cluster,
+    HomePageData,
+    TonightData,
+    DailySummary,
+} from "@/lib/api";
+import { NewsCard } from "@/components/news-card";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
+import { TonightSidebar } from "@/components/tonight-sidebar";
+import { TonightMobileCombined } from "@/components/tonight-mobile-combined";
+import { AppDownloadBanner } from "@/components/app-download-banner";
+import { MainContentWrapper } from "@/components/main-content-wrapper";
+import { cookies } from "next/headers";
+import { MUTED_COOKIE, parseMutedCookie, applyMutesToClusters, applyMutesToTonight } from "@/lib/mutes";
+import { CategoryColors, CategoryKey } from "@/lib/constants";
+import { type CountryCode } from "@/lib/country";
+import { NAV_CATEGORIES, categoryHref } from "@/lib/routes";
+import Link from "next/link";
+
+function SectionHeader({ title, color, moreHref }: { title: string; color?: string; moreHref?: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span
+        className="w-[5px] h-[20px] rounded-sm shrink-0"
+        style={{ backgroundColor: color || 'var(--primary)' }}
+      />
+      <h2 className="font-serif text-[22px] font-bold tracking-tight text-foreground leading-none">
+        {title.charAt(0).toUpperCase() + title.slice(1).toLowerCase()}
+      </h2>
+      <div className="flex-1 h-px bg-border" />
+      {moreHref && (
+        <Link
+          href={moreHref}
+          className="text-[12px] font-semibold text-muted-foreground hover:text-foreground whitespace-nowrap"
+        >
+          Më shumë ›
+        </Link>
+      )}
+    </div>
+  );
+}
+
+function CategorySection({ title, clusters, color, moreHref }: { title: string; clusters: Cluster[]; color?: string; moreHref?: string }) {
+  if (clusters.length === 0) return null;
+
+  return (
+    <section className="mt-9">
+      <SectionHeader title={title} color={color} moreHref={moreHref} />
+      <div>
+        {clusters.map((cluster) => (
+          <NewsCard key={cluster.id} cluster={cluster} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export interface HomeFeedProps {
+  /**
+   * The edition to fetch. Already resolved by the route: from the URL segment
+   * where there is one, from the cookie on `/`. This component never reads the
+   * country itself, so there is exactly one place per route that decides it.
+   */
+  country: CountryCode;
+  /** `''` on `/`, `/mk` on a country URL. See lib/routes.ts. */
+  base: string;
+  /** `'all'` for the homepage, otherwise a category slug. */
+  category: string;
+  /** `?preview=summary` — forces the briefing player outside its hours. */
+  previewSummary?: boolean;
+}
+
+export async function HomeFeed({ country, base, category, previewSummary = false }: HomeFeedProps) {
+  const selectedCategory = category || "all";
+
+  let homepageData: HomePageData = {
+    top_overall: [], vendi: [], rajoni: [], bota: [], sport: [], tech: []
+  };
+  let categoryData: Cluster[] = [];
+  let tonightData: TonightData = { clusters: [], is_active_hours: false };
+  let dailySummary: DailySummary | null = null;
+  let error = null;
+
+  try {
+    if (selectedCategory === "all") {
+      homepageData = await getNews(country);
+    } else {
+      categoryData = await getNewsByCategory(selectedCategory, country);
+    }
+
+    // Collect all cluster IDs from main feed for deduplication
+    const mainFeedClusterIds: number[] = [];
+    if (selectedCategory === "all") {
+      Object.values(homepageData).forEach((clusters: Cluster[]) => {
+        clusters.forEach((c: Cluster) => mainFeedClusterIds.push(c.id));
+      });
+    } else {
+      categoryData.forEach((c: Cluster) => mainFeedClusterIds.push(c.id));
+    }
+
+    // Fetch tonight data with exclusions
+    try {
+      tonightData = await getTonightNews(mainFeedClusterIds, country);
+    } catch (e) {
+      console.error("Failed to fetch tonight news:", e);
+    }
+
+    // Fetch daily summary
+    try {
+      dailySummary = await getDailySummary(country);
+    } catch (e) {
+      console.error("Failed to fetch daily summary:", e);
+    }
+  } catch (e) {
+    console.error("Failed to fetch news:", e);
+    error = "Nuk mund të merren lajmet. Provoni përsëri më vonë.";
+  }
+
+  // Apply reader muted-publisher preferences (cookie) before render.
+  const muted = parseMutedCookie((await cookies()).get(MUTED_COOKIE)?.value);
+  if (muted.size > 0) {
+    homepageData = {
+      top_overall: applyMutesToClusters(homepageData.top_overall, muted),
+      vendi: applyMutesToClusters(homepageData.vendi, muted),
+      rajoni: applyMutesToClusters(homepageData.rajoni, muted),
+      bota: applyMutesToClusters(homepageData.bota, muted),
+      sport: applyMutesToClusters(homepageData.sport, muted),
+      tech: applyMutesToClusters(homepageData.tech, muted),
+    };
+    categoryData = applyMutesToClusters(categoryData, muted);
+    tonightData = { ...tonightData, clusters: applyMutesToTonight(tonightData.clusters, muted) };
+  }
+
+  // Backend already returns clusters sorted: today first (by article_count DESC),
+  // then yesterday (by article_count DESC). Just take up to 12 results.
+  const tonightClusters = tonightData.clusters.slice(0, 12);
+
+  return (
+    <div className="min-h-screen bg-background">
+      <SiteHeader
+        selectedCategory={selectedCategory}
+        base={base}
+        hasTonightClusters={tonightClusters.length > 0}
+        serverIsNight={tonightData.is_active_hours}
+        forceShow={previewSummary}
+      />
+
+      {/* Main Content */}
+      <MainContentWrapper
+        hasTonightClusters={tonightClusters.length > 0}
+        serverIsNight={tonightData.is_active_hours}
+        forceShow={previewSummary}
+      >
+        {/* Mobile Summary Player - stays at top */}
+        <TonightMobileCombined
+          clusters={[]}
+          summary={dailySummary}
+          serverIsNight={tonightData.is_active_hours}
+          forceShow={previewSummary}
+        />
+
+        {/* Mobile-only install prompt (dismissible); desktop gets footer links */}
+        <AppDownloadBanner />
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-600 dark:text-red-400 text-sm font-medium">
+            {error}
+          </div>
+        )}
+
+        <div className="flex gap-8">
+          {/* Left Sidebar - Trending + Summary Player */}
+          <TonightSidebar
+            clusters={tonightClusters}
+            summary={dailySummary}
+            serverIsNight={tonightData.is_active_hours}
+            forceShow={previewSummary}
+          />
+
+          {/* News Feed */}
+          <div className="flex-1 min-w-0">
+            {selectedCategory === "all" ? (
+              <>
+                {homepageData.top_overall.map((cluster) => (
+                  <NewsCard key={cluster.id} cluster={cluster} />
+                ))}
+
+                {/* Mobile Titujt kryesor - after the top stories */}
+                <TonightMobileCombined
+                  clusters={tonightClusters}
+                  summary={null}
+                  serverIsNight={tonightData.is_active_hours}
+                  forceShow={previewSummary}
+                />
+
+                <CategorySection title="Vendi" clusters={homepageData.vendi} color={CategoryColors.vendi} moreHref={categoryHref(base, "vendi")} />
+                <CategorySection title="Rajoni" clusters={homepageData.rajoni} color={CategoryColors.rajoni} moreHref={categoryHref(base, "rajoni")} />
+                <CategorySection title="Bota" clusters={homepageData.bota} color={CategoryColors.bota} moreHref={categoryHref(base, "bota")} />
+                <CategorySection title="Sport" clusters={homepageData.sport} color={CategoryColors.sport} moreHref={categoryHref(base, "sport")} />
+                <CategorySection title="Tech" clusters={homepageData.tech} color={CategoryColors.tech} moreHref={categoryHref(base, "tech")} />
+              </>
+            ) : (
+              <section>
+                <SectionHeader
+                  title={NAV_CATEGORIES.find(c => c.key === selectedCategory)?.label || "Lajmet"}
+                  color={CategoryColors[selectedCategory as CategoryKey]}
+                />
+                <div>
+                  {categoryData.map((cluster) => (
+                    <NewsCard key={cluster.id} cluster={cluster} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {((selectedCategory === "all" && Object.values(homepageData).every(arr => arr.length === 0)) ||
+              (selectedCategory !== "all" && categoryData.length === 0)) && !error && (
+                <div className="py-20 text-center text-muted-foreground">
+                  Nuk ka lajme për momentin.
+                </div>
+              )}
+          </div>
+
+          {/* Right Sidebar - Ads */}
+          <aside className="hidden lg:block w-[300px] shrink-0">
+            <div className="sticky top-[60px]">
+              <div className="bg-muted rounded-lg p-6 text-center text-muted-foreground text-sm min-h-[250px] flex items-center justify-center border border-dashed border-border">
+                {/* Reserved for advertisements */}
+              </div>
+
+              <div className="mt-6 bg-muted rounded-lg p-6 text-center text-muted-foreground text-sm min-h-[250px] flex items-center justify-center border border-dashed border-border">
+                {/* Reserved for advertisements */}
+              </div>
+            </div>
+          </aside>
+
+        </div>
+      </MainContentWrapper>
+
+      <SiteFooter />
+    </div>
+  );
+}

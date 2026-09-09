@@ -6,10 +6,19 @@
  * A reader in Prishtina wants Kosovo as home news and Albania as regional; a
  * reader in Tirana wants the reverse.
  *
- * The choice lives in a cookie rather than the URL because every page here is
- * server-rendered with `cache: 'no-store'` — a cookie is readable during that
- * render, so the first paint is already the right country instead of flashing
- * Macedonia and then swapping.
+ * There are TWO ways a request names its edition, and the order matters:
+ *
+ *  1. The URL — `/mk`, `/ks/vendi`. Explicit, linkable, shareable and
+ *     indexable, which a cookie can never be: a Kosovar reader sending a link
+ *     to a friend sends the Kosovo edition, not "whatever your cookie says".
+ *  2. The cookie, `klasteri_country`. This is the fallback, and it is what the
+ *     bare `/` runs on — that URL is the deployed homepage and every existing
+ *     inbound link and search result points at it, so it must keep behaving
+ *     exactly as it always has: cookie, defaulting to MK.
+ *
+ * A cookie is readable during the server render, and every page here fetches
+ * with `cache: 'no-store'`, so the first paint on `/` is already the right
+ * country rather than flashing Macedonia and then swapping.
  */
 
 /**
@@ -30,7 +39,7 @@
 export const COUNTRIES = [
     { code: 'AL', label: 'Shqipëri' },
     { code: 'KS', label: 'Kosovë' },
-    { code: 'MK', label: 'Maqedoni' },
+    { code: 'MK', label: 'Maqedonia e V.' },
 ] as const;
 
 export type CountryCode = (typeof COUNTRIES)[number]['code'];
@@ -85,3 +94,45 @@ export async function getActiveCountry(): Promise<CountryCode> {
 export function withCountry(path: string, country: CountryCode): string {
     return `${path}${path.includes('?') ? '&' : '?'}country=${country}`;
 }
+
+/**
+ * The URL spelling of an edition: lowercase, and the APP's code.
+ *
+ * Kosovo is `ks`, never `xk`. `KS` is what `COUNTRIES` holds, what the API
+ * expects in `?country=` and what the crawler's registry calls it; introducing
+ * the ISO user-assigned `XK` purely for the URL would mean a second name for
+ * one thing, and every conversion between them is a chance to get it wrong.
+ */
+export function countrySlug(code: CountryCode): string {
+    return code.toLowerCase();
+}
+
+/**
+ * Read an edition back out of a URL segment, or null if the segment is not one.
+ *
+ * Null is the interesting case: `/[country]` sits at the site root, so it is
+ * offered EVERY unmatched single-segment path. Returning null lets the route
+ * call `notFound()` — a typo'd URL has to 404, not quietly serve Macedonia
+ * under someone else's name.
+ *
+ * Case-insensitive on the way in while every link we generate is lowercase, so
+ * a hand-typed `/MK` still lands somewhere; the pages set a lowercase canonical
+ * so that leniency does not turn into duplicate URLs in a search index.
+ */
+export function countryFromSlug(slug: string | undefined | null): CountryCode | null {
+    if (!slug) return null;
+    const upper = slug.toUpperCase();
+    return isCountryCode(upper) ? upper : null;
+}
+
+/**
+ * The edition's name written out, for <title> and meta description.
+ *
+ * Deliberately not `COUNTRIES[].label`: that one is abbreviated to fit the
+ * switcher button ("Maqedonia e V."), which reads as a typo in a page title.
+ */
+export const COUNTRY_NAMES: Record<CountryCode, string> = {
+    AL: 'Shqipëri',
+    KS: 'Kosovë',
+    MK: 'Maqedoni e Veriut',
+};

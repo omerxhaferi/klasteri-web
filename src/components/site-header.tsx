@@ -7,18 +7,17 @@ import { CountrySwitcher } from "@/components/country-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SearchBar } from "@/components/search-bar";
 import { CategoryColors, CategoryKey } from "@/lib/constants";
-
-const CATEGORIES = [
-  { key: "top_overall", label: "Kryesore", href: "/" },
-  { key: "vendi", label: "Vendi", href: "/?category=vendi" },
-  { key: "rajoni", label: "Rajoni", href: "/?category=rajoni" },
-  { key: "bota", label: "Bota", href: "/?category=bota" },
-  { key: "sport", label: "Sport", href: "/?category=sport" },
-  { key: "tech", label: "Tech", href: "/?category=tech" },
-] as const;
+import { NAV_CATEGORIES, categoryHref, homeHref } from "@/lib/routes";
 
 interface SiteHeaderProps {
   selectedCategory?: string;
+  /**
+   * How this page's links should be spelled: `''` when the edition comes from
+   * the cookie (`/`, `/search`, `/settings`, `/cluster/:id`) and `/mk` when it
+   * is in the URL. Defaults to `''`, so the pages that do not pass it keep
+   * exactly the links they had.
+   */
+  base?: string;
   hasTonightClusters?: boolean;
   serverIsNight?: boolean;
   forceShow?: boolean;
@@ -27,7 +26,7 @@ interface SiteHeaderProps {
 const WEEKDAYS_SQ = ["E diel", "E hënë", "E martë", "E mërkurë", "E enjte", "E premte", "E shtunë"];
 const MONTHS_SQ = ["janar", "shkurt", "mars", "prill", "maj", "qershor", "korrik", "gusht", "shtator", "tetor", "nëntor", "dhjetor"];
 
-export function SiteHeader({ selectedCategory }: SiteHeaderProps) {
+export function SiteHeader({ selectedCategory, base = "" }: SiteHeaderProps) {
   const now = new Date();
   const today = `${WEEKDAYS_SQ[now.getDay()]}, ${now.getDate()} ${MONTHS_SQ[now.getMonth()]} ${now.getFullYear()}`;
 
@@ -45,7 +44,7 @@ export function SiteHeader({ selectedCategory }: SiteHeaderProps) {
             </p>
 
             <Link
-              href="/"
+              href={homeHref(base)}
               className="flex items-center gap-2.5 lg:absolute lg:left-1/2 lg:-translate-x-1/2 hover:no-underline"
             >
               <Logo width={34} height={34} />
@@ -74,7 +73,7 @@ export function SiteHeader({ selectedCategory }: SiteHeaderProps) {
       <nav className="sticky top-0 z-50 border-y border-border bg-background/90 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-stretch justify-start md:justify-center gap-1 overflow-x-auto scrollbar-hide h-11">
-            {CATEGORIES.map((cat) => {
+            {NAV_CATEGORIES.map((cat) => {
               const isActive =
                 (selectedCategory === "all" && cat.key === "top_overall") ||
                 selectedCategory === cat.key;
@@ -84,7 +83,7 @@ export function SiteHeader({ selectedCategory }: SiteHeaderProps) {
               return (
                 <Link
                   key={cat.key}
-                  href={cat.href}
+                  href={categoryHref(base, cat.key)}
                   className={`relative flex items-center px-3.5 text-[12.5px] font-semibold uppercase tracking-[0.08em] whitespace-nowrap transition-colors hover:no-underline ${
                     isActive
                       ? "text-foreground"

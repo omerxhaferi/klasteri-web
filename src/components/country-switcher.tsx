@@ -3,10 +3,22 @@
 /**
  * Edition picker.
  *
- * Writes the choice to a cookie and calls `router.refresh()`, which re-runs the
- * server render — every page here fetches with `cache: 'no-store'`, so the
- * whole page comes back as the new country's news without a full reload and
- * without any client-side refetch plumbing.
+ * Two behaviours, chosen by the URL rather than by a prop — the switcher can
+ * read the path itself, and a prop would have to be threaded through every
+ * page that renders a header:
+ *
+ *  - On a country URL (`/ks`, `/ks/sport`) it NAVIGATES, swapping the country
+ *    segment and keeping the category. The URL names the edition there, so
+ *    leaving it on `/ks` while showing Macedonian news would be a lie, and a
+ *    reader who then copied the link would send the wrong edition.
+ *  - Everywhere else (`/`, `/search`, `/settings`, `/cluster/:id`) it keeps the
+ *    original behaviour: write the cookie, `router.refresh()`. That re-runs the
+ *    server render, and every page here fetches with `cache: 'no-store'`, so
+ *    the whole page comes back as the new country's news without a full reload.
+ *
+ * The cookie is written in BOTH cases. It is what `/` reads, and someone who
+ * picks Kosovo on `/ks` and later opens the bare homepage should still get
+ * Kosovo.
  */
 
 import { CountryMark } from '@/components/country-mark';
@@ -15,30 +27,45 @@ import {
     COUNTRY_COOKIE,
     COUNTRY_COOKIE_MAX_AGE,
     DEFAULT_COUNTRY,
+    countryFromSlug,
+    countrySlug,
     isCountryCode,
     type CountryCode,
 } from '@/lib/country';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, useTransition } from 'react';
 
 export function CountrySwitcher() {
     const router = useRouter();
+    const pathname = usePathname();
     const [open, setOpen] = useState(false);
     const [pending, startTransition] = useTransition();
     const boxRef = useRef<HTMLDivElement>(null);
+
+    // `['', 'ks', 'sport']` for /ks/sport. Non-null only on a country URL,
+    // which is what selects navigate-vs-cookie below.
+    const segments = pathname.split('/');
+    const urlCountry = countryFromSlug(segments[1]);
+    const restOfPath = segments.slice(2).filter(Boolean).join('/');
 
     // Read AFTER mount, not during render. The header is server-rendered and
     // the server has no `document`; reading the cookie inline would make the
     // client's first render disagree with the server's HTML and React would
     // throw a hydration mismatch. One frame of the default label is the cost.
-    const [current, setCurrent] = useState<CountryCode>(DEFAULT_COUNTRY);
+    const [cookieCountry, setCookieCountry] = useState<CountryCode>(DEFAULT_COUNTRY);
     useEffect(() => {
         const hit = document.cookie
             .split('; ')
             .find((row) => row.startsWith(`${COUNTRY_COOKIE}=`))
             ?.split('=')[1];
-        if (isCountryCode(hit)) setCurrent(hit);
+        if (isCountryCode(hit)) setCookieCountry(hit);
     }, []);
+
+    // The URL wins, and it is known during render on both server and client —
+    // so on /ks the button reads "Kosovë" in the very first paint, even for a
+    // reader whose cookie still says MK. Falling back to the cookie would put
+    // the wrong label over the right feed.
+    const current = urlCountry ?? cookieCountry;
 
     const active = COUNTRIES.find((c) => c.code === current) ?? COUNTRIES[0];
 
@@ -61,14 +88,31 @@ export function CountrySwitcher() {
     function choose(code: CountryCode) {
         setOpen(false);
         if (code === current) return;
+
+        // Written on both paths. On a country URL the URL is what decides the
+        // feed, but this is still the reader's choice and `/` has no other way
+        // to learn it.
         document.cookie =
             `${COUNTRY_COOKIE}=${code}; path=/; max-age=${COUNTRY_COOKIE_MAX_AGE}; SameSite=Lax`;
         // Update the label ourselves. `router.refresh()` re-renders the server
         // tree but does NOT remount this client component, so the mount-time
         // cookie read never runs again — without this the page would show
-        // Kosovo's news under a button still labelled Macedonia.
-        setCurrent(code);
-        startTransition(() => router.refresh());
+        // Kosovo's news under a button still labelled Macedonia. (On the
+        // navigate path the label follows `pathname` instead, but keeping this
+        // in sync costs nothing and matters the moment the reader lands back
+        // on a cookie-scoped page.)
+        setCookieCountry(code);
+
+        startTransition(() => {
+            if (urlCountry) {
+                // /ks/sport → /mk/sport. The category segment is kept: all
+                // three editions share one taxonomy, so the reader who was on
+                // Sport wants Sport.
+                router.push(`/${countrySlug(code)}${restOfPath ? `/${restOfPath}` : ''}`);
+            } else {
+                router.refresh();
+            }
+        });
     }
 
     return (

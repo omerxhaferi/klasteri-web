@@ -1,4 +1,4 @@
-import { getActiveCountry, withCountry } from '@/lib/country';
+import { getActiveCountry, withCountry, type CountryCode } from '@/lib/country';
 
 export interface Article {
     id: number;
@@ -67,19 +67,24 @@ const rawUrl = process.env.NEXT_PUBLIC_API_URL || 'https://clusta-8d555484de44.h
 const API_BASE_URL = rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`;
 
 /**
- * Build an API URL scoped to the reader's chosen edition.
+ * Build an API URL scoped to an edition.
  *
  * Every request goes through this, deliberately. Adding `country=` at each call
  * site would work until someone adds the thirteenth endpoint and forgets — and
  * the failure is silent: that one endpoint keeps serving Macedonian news while
  * the rest of the page shows Kosovo.
+ *
+ * `country` is optional and, when omitted, resolves to the cookie exactly as it
+ * always did — which is what `/`, `/search`, `/settings` and `/cluster/:id`
+ * rely on. A page whose URL names the edition passes it explicitly, because on
+ * `/ks` the URL has to beat a cookie that may well say MK.
  */
-async function apiUrl(path: string): Promise<string> {
-    return `${API_BASE_URL}${withCountry(path, await getActiveCountry())}`;
+async function apiUrl(path: string, country?: CountryCode): Promise<string> {
+    return `${API_BASE_URL}${withCountry(path, country ?? (await getActiveCountry()))}`;
 }
 
-export async function getNews(): Promise<HomePageData> {
-    const res = await fetch(await apiUrl(`/api/news`), {
+export async function getNews(country?: CountryCode): Promise<HomePageData> {
+    const res = await fetch(await apiUrl(`/api/news`, country), {
         cache: 'no-store',
     });
 
@@ -90,8 +95,8 @@ export async function getNews(): Promise<HomePageData> {
     return res.json();
 }
 
-export async function getNewsByCategory(category: string): Promise<Cluster[]> {
-    const res = await fetch(await apiUrl(`/api/news/${category}`), {
+export async function getNewsByCategory(category: string, country?: CountryCode): Promise<Cluster[]> {
+    const res = await fetch(await apiUrl(`/api/news/${category}`, country), {
         cache: 'no-store',
     });
 
@@ -102,8 +107,8 @@ export async function getNewsByCategory(category: string): Promise<Cluster[]> {
     return res.json();
 }
 
-export async function getCluster(id: string): Promise<Cluster> {
-    const res = await fetch(await apiUrl(`/api/clusters/${id}`), {
+export async function getCluster(id: string, country?: CountryCode): Promise<Cluster> {
+    const res = await fetch(await apiUrl(`/api/clusters/${id}`, country), {
         cache: 'no-store',
     });
 
@@ -114,12 +119,12 @@ export async function getCluster(id: string): Promise<Cluster> {
     return res.json();
 }
 
-export async function getTonightNews(excludeIds: number[] = []): Promise<TonightData> {
+export async function getTonightNews(excludeIds: number[] = [], country?: CountryCode): Promise<TonightData> {
     const params = excludeIds.length > 0
         ? `?exclude_ids=${excludeIds.join(',')}`
         : '';
 
-    const res = await fetch(await apiUrl(`/api/news/tonight${params}`), {
+    const res = await fetch(await apiUrl(`/api/news/tonight${params}`, country), {
         cache: 'no-store',
     });
 
@@ -136,13 +141,13 @@ export interface SearchResult {
     query: string;
 }
 
-export async function searchNews(query: string, limit = 20): Promise<SearchResult> {
+export async function searchNews(query: string, limit = 20, country?: CountryCode): Promise<SearchResult> {
     const params = new URLSearchParams({
         q: query,
         limit: limit.toString(),
     });
 
-    const res = await fetch(await apiUrl(`/api/search?${params}`), {
+    const res = await fetch(await apiUrl(`/api/search?${params}`, country), {
         cache: 'no-store',
     });
 
@@ -175,16 +180,16 @@ export interface SourceInfo {
     article_count: number;
 }
 
-export async function getSources(): Promise<SourceInfo[]> {
-    const res = await fetch(await apiUrl(`/api/sources`), { cache: 'no-store' });
+export async function getSources(country?: CountryCode): Promise<SourceInfo[]> {
+    const res = await fetch(await apiUrl(`/api/sources`, country), { cache: 'no-store' });
     if (!res.ok) {
         throw new Error('Failed to fetch sources');
     }
     return res.json();
 }
 
-export async function getDailySummary(): Promise<DailySummary | null> {
-    const res = await fetch(await apiUrl(`/api/summary/today`), {
+export async function getDailySummary(country?: CountryCode): Promise<DailySummary | null> {
+    const res = await fetch(await apiUrl(`/api/summary/today`, country), {
         cache: 'no-store',
     });
 
