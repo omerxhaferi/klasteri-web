@@ -3,6 +3,7 @@ import { Logo } from "@/components/logo";
 import { SiteFooter } from "@/components/site-footer";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { getCluster } from "@/lib/api";
+import { isCountryCode } from "@/lib/country";
 import { CategoryKey } from "@/lib/constants";
 import { BackButton } from "@/components/back-button";
 import { ChevronLeft } from "lucide-react";
@@ -12,14 +13,30 @@ export const dynamic = "force-dynamic";
 
 export default async function ClusterPage({
     params,
+    searchParams,
 }: {
     params: Promise<{ id: string }>;
+    searchParams: Promise<{ country?: string }>;
 }) {
     const { id } = await params;
+    /*
+     * A shared link carries its own country, and must.
+     *
+     * Cluster ids are global but the API scopes them: asking for a Kosovo
+     * cluster with country=MK is a 404, not a fallback. This page used to send
+     * no country at all, so it resolved against the VISITOR's cookie — which
+     * meant a Kosovo story shared to anyone reading the Macedonian edition
+     * opened as "Nuk u gjet ky grup lajmesh." The link worked only for people
+     * who already happened to be on the right edition.
+     *
+     * Deliberately does NOT write the cookie. Following someone's link should
+     * show you their story, not silently move you to their edition.
+     */
+    const { country } = await searchParams;
     let cluster;
 
     try {
-        cluster = await getCluster(id);
+        cluster = await getCluster(id, isCountryCode(country) ? country : undefined);
     } catch (e) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center p-4">
