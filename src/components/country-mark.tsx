@@ -13,14 +13,16 @@
 import type { CountryCode } from '@/lib/country';
 
 /**
- * 4:3, and every flag is framed to it.
+ * A circle, and every flag is cropped to its middle.
  *
- * The three do not share a ratio — Macedonia is 2:1 where Kosovo and Albania
- * are 7:5 — so at their true proportions they would be visibly different widths
- * down a menu, which reads as a layout bug rather than as accuracy. One box with
- * `object-cover` keeps the column straight; the crop takes a few pixels off
- * Macedonia's left and right edges and touches nothing that identifies any of
- * them.
+ * That works for these three specifically: all of them put their mark dead
+ * centre — Macedonia's sun, Kosovo's map and stars, Albania's eagle — so the
+ * crop takes only empty field from the sides. Macedonia loses the most, being
+ * 2:1 against the others' 7:5, and loses nothing but red.
+ *
+ * A circle also settles the ratio problem it would otherwise have: at their
+ * true proportions the three are visibly different widths down a menu, which
+ * reads as a layout bug rather than as accuracy.
  */
 export function CountryMark({
     code,
@@ -45,11 +47,11 @@ export function CountryMark({
              * announce each row twice.
              */
             aria-hidden="true"
-            width={Math.round(size * (4 / 3))}
+            width={size}
             height={size}
-            className={`inline-block shrink-0 rounded-[3px] object-cover ${className}`}
+            className={`inline-block shrink-0 rounded-full object-cover ${className}`}
             style={{
-                width: Math.round(size * (4 / 3)),
+                width: size,
                 height: size,
                 // Albania's and Macedonia's red fields bleed into a dark menu
                 // without an edge, and Kosovo's white stars do the same on a

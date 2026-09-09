@@ -21,10 +21,16 @@
  * instead, which also keeps the artwork out of this module: `lib/api.ts`
  * imports it on the server, and nothing here should pull in React.
  */
+/*
+ * Listed Albania, Kosovo, Macedonia — a display order, nothing more, and the
+ * same order the app uses. Nothing indexes this array by position; every
+ * consumer maps over it, and the fallback edition is DEFAULT_COUNTRY below,
+ * which is unaffected and stays MK.
+ */
 export const COUNTRIES = [
-    { code: 'MK', label: 'Maqedonia e Veriut', short: 'Maqedoni' },
-    { code: 'KS', label: 'Kosova', short: 'Kosovë' },
     { code: 'AL', label: 'Shqipëria', short: 'Shqipëri' },
+    { code: 'KS', label: 'Kosova', short: 'Kosovë' },
+    { code: 'MK', label: 'Maqedonia e Veriut', short: 'Maqedoni' },
 ] as const;
 
 export type CountryCode = (typeof COUNTRIES)[number]['code'];
