@@ -17,12 +17,15 @@ import {
     getNewsByCategory,
     getTonightNews,
     getDailySummary,
+    getFuelPrices,
     Cluster,
     HomePageData,
     TonightData,
     DailySummary,
+    FuelPricesData,
 } from "@/lib/api";
 import { NewsCard } from "@/components/news-card";
+import { FuelPricesCard } from "@/components/fuel-prices-card";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { TonightSidebar } from "@/components/tonight-sidebar";
@@ -92,6 +95,13 @@ export interface HomeFeedProps {
 export async function HomeFeed({ country, base, category, previewSummary = false }: HomeFeedProps) {
   const selectedCategory = category || "all";
 
+  // Started first and awaited last, so it never adds to the page's wait. A
+  // failure only hides the card: prices must not cost anyone the news.
+  const fuelRequest: Promise<FuelPricesData | null> = getFuelPrices(country).catch((e) => {
+    console.error("Failed to fetch fuel prices:", e);
+    return null;
+  });
+
   let homepageData: HomePageData = {
     top_overall: [], vendi: [], rajoni: [], bota: [], sport: [], tech: []
   };
@@ -154,6 +164,9 @@ export async function HomeFeed({ country, base, category, previewSummary = false
   // then yesterday (by article_count DESC). Just take up to 12 results.
   const tonightClusters = tonightData.clusters.slice(0, 12);
 
+  const fuelPrices = await fuelRequest;
+  const hasFuel = !!fuelPrices && fuelPrices.prices.length > 0;
+
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader
@@ -194,6 +207,7 @@ export async function HomeFeed({ country, base, category, previewSummary = false
             summary={dailySummary}
             serverIsNight={tonightData.is_active_hours}
             forceShow={previewSummary}
+            fuel={fuelPrices}
           />
 
           {/* News Feed */}
@@ -203,6 +217,9 @@ export async function HomeFeed({ country, base, category, previewSummary = false
                 {homepageData.top_overall.map((cluster) => (
                   <NewsCard key={cluster.id} cluster={cluster} />
                 ))}
+
+                {/* Mobile fuel prices, above Titujt kryesor as in the desktop sidebar */}
+                {hasFuel && <FuelPricesCard data={fuelPrices!} className="lg:hidden mt-6 mb-6" />}
 
                 {/* Mobile Titujt kryesor - after the top stories */}
                 <TonightMobileCombined

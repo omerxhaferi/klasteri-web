@@ -15,6 +15,11 @@
   --primary-foreground: #ffffff;
   --accent: #ece9df;
   --hot: #c2410c;
+  /* Fuel price moves (components/fuel-prices-card.tsx). Here and not as
+     dark: utilities, because Tailwind's dark: follows the OS while this site's
+     theme follows its own toggle. Both ≥ 4.5:1 on --background. */
+  --price-down: #047857;
+  --price-up: #dc2626;
 }
 
 .dark {
@@ -30,6 +35,8 @@
   --primary-foreground: #131211;
   --accent: #262420;
   --hot: #fb923c;
+  --price-down: #34d399;
+  --price-up: #f87171;
 }
 
 @theme inline {

@@ -188,6 +188,35 @@ export async function getSources(country?: CountryCode): Promise<SourceInfo[]> {
     return res.json();
 }
 
+/** The regulator's maximum fuel prices (MK only; every other edition gets `prices: []`). */
+export interface FuelPrice {
+    product: string;               // bs95 | bs98 | diesel | el1 | mazut
+    price: number;                 // denars per `unit`
+    unit: string;                  // "l" | "kg"
+    valid_from: string;            // YYYY-MM-DD
+    previous_price: number | null;
+    change: number | null;         // price - previous_price
+}
+
+export interface FuelPricesData {
+    country: string;
+    source: string | null;
+    checked_at: string | null;
+    prices: FuelPrice[];
+}
+
+export async function getFuelPrices(country?: CountryCode): Promise<FuelPricesData> {
+    const res = await fetch(await apiUrl(`/api/fuel-prices`, country), {
+        cache: 'no-store',
+    });
+
+    if (!res.ok) {
+        throw new Error('Failed to fetch fuel prices');
+    }
+
+    return res.json();
+}
+
 export async function getDailySummary(country?: CountryCode): Promise<DailySummary | null> {
     const res = await fetch(await apiUrl(`/api/summary/today`, country), {
         cache: 'no-store',

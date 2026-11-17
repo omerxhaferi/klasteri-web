@@ -1,17 +1,20 @@
 "use client";
 
-import { DailySummary, TonightCluster } from "@/lib/api";
+import { DailySummary, FuelPricesData, TonightCluster } from "@/lib/api";
 import { CategoryColors, CategoryKey, SOURCE_COLORS } from "@/lib/constants";
 import { getAccessibleColor } from "@/lib/utils";
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
 import { SummaryPlayerCard } from "@/components/summary-player-card";
+import { FuelPricesCard } from "@/components/fuel-prices-card";
 
 interface TonightSidebarProps {
     clusters: TonightCluster[];
     summary: DailySummary | null;
     serverIsNight: boolean;
     forceShow?: boolean;
+    /** Above "Titujt kryesor"; the list scrolls to make room for it. */
+    fuel?: FuelPricesData | null;
 }
 
 function formatTime(dateString: string): string {
@@ -31,14 +34,16 @@ function formatTime(dateString: string): string {
 
 const subscribe = () => () => {};
 
-export function TonightSidebar({ clusters, summary }: TonightSidebarProps) {
+export function TonightSidebar({ clusters, summary, fuel }: TonightSidebarProps) {
     const isDarkMode = useSyncExternalStore(
         subscribe,
         () => document.documentElement.classList.contains("dark"),
         () => false
     );
 
-    if (clusters.length === 0 && !summary) {
+    const hasFuel = !!fuel && fuel.prices.length > 0;
+
+    if (clusters.length === 0 && !summary && !hasFuel) {
         return null;
     }
 
@@ -50,6 +55,8 @@ export function TonightSidebar({ clusters, summary }: TonightSidebarProps) {
                         <SummaryPlayerCard summary={summary} />
                     </div>
                 )}
+
+                {hasFuel && <FuelPricesCard data={fuel!} className="shrink-0" />}
 
                 {clusters.length > 0 && (
                     <div className="flex flex-col min-h-0">
