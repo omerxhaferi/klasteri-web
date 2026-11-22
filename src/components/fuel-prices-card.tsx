@@ -13,6 +13,7 @@
  */
 
 import type { FuelPrice, FuelPricesData } from "@/lib/api";
+import { TabHeading } from "@/components/tab-heading";
 
 interface Edition {
     /** In display order. Mazut (MK) is left out: sold by the kilo, to industry. */
@@ -82,8 +83,7 @@ function Change({ value, currencyWord }: { value: number | null; currencyWord: s
     const meaning = cheaper ? `U ul për ${size} ${currencyWord}` : `U rrit për ${size} ${currencyWord}`;
     return (
         <span
-            className="w-12 shrink-0 text-right text-[11px] font-semibold tabular-nums"
-            // Theme variables (globals.css), not dark: utilities — see there.
+            className="w-12 shrink-0 text-right text-[11px] font-bold tabular-nums"
             style={{ color: cheaper ? "var(--price-down)" : "var(--price-up)" }}
             title={meaning}
             aria-label={meaning}
@@ -107,22 +107,18 @@ export function FuelPricesCard({ data, className = "" }: { data: FuelPricesData;
 
     return (
         <section className={className} aria-label="Çmimet e karburanteve">
-            <div className="flex items-baseline justify-between pb-2 border-b-2 border-foreground">
-                <h2 className="font-serif text-[19px] font-bold tracking-tight text-foreground">
-                    Karburantet
-                </h2>
-                <span className="text-[11px] text-muted-foreground">
-                    nga {dayAndMonth(validFrom)}
-                </span>
-            </div>
+            <TabHeading title="Karburantet" right={`nga ${dayAndMonth(validFrom)}`} />
 
-            <ul className="divide-y divide-border">
+            <ul>
                 {rows.map(({ label, price }) => (
-                    <li key={price.product} className="py-2 flex items-baseline gap-2">
-                        <span className="flex-1 min-w-0 truncate text-[13px] text-foreground">
+                    <li
+                        key={price.product}
+                        className="py-[5px] flex items-baseline gap-2 border-b border-dotted border-border"
+                    >
+                        <span className="flex-1 min-w-0 truncate text-[13px]">
                             {label}
                         </span>
-                        <span className="text-[14px] font-semibold tabular-nums text-foreground whitespace-nowrap">
+                        <span className="text-[14px] font-bold tabular-nums whitespace-nowrap">
                             {amount(price.price)}{" "}
                             <span className="text-[11px] font-normal text-muted-foreground">{edition.currency}</span>
                         </span>
@@ -131,13 +127,13 @@ export function FuelPricesCard({ data, className = "" }: { data: FuelPricesData;
                 ))}
             </ul>
 
-            <p className="pt-2 border-t border-border text-[11px] text-muted-foreground">
+            <p className="pt-1.5 text-[11px] text-muted-foreground">
                 Çmimet maksimale për litër, sipas{" "}
                 <a
                     href={edition.source.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:text-foreground hover:underline"
+                    className="text-primary"
                 >
                     {edition.source.name}
                 </a>

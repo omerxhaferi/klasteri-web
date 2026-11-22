@@ -3,9 +3,10 @@
 import type { Article, Beat } from "@/lib/api";
 import { SOURCE_COLORS, CategoryColors, CategoryKey } from "@/lib/constants";
 import { getAccessibleColor } from "@/lib/utils";
-import { ExternalLink } from "lucide-react";
+import { hideIfBroken, hideOnError } from "@/lib/images";
 import { useEffect, useState } from "react";
 import { ClusterTimeline } from "@/components/cluster-timeline";
+import { TabHeading } from "@/components/tab-heading";
 
 function getTimeAgo(dateString: string): string {
     const now = new Date();
@@ -55,54 +56,57 @@ export function ClusterDetailContent({
 
     return (
         <>
-            {/* Cluster Header / Main Article */}
+            {/* The lead article: the feed's card, at reading size */}
             {mainArticle && (
-                <div className="text-center mb-12">
-                    <div className="flex justify-center mb-6">
-                        {mainArticle.image_url ? (
+                <div className="pb-5">
+                    <div className="flex gap-4">
+                        <div className="flex-1 min-w-0">
+                            <h1 className="text-[22px] md:text-[26px] font-bold leading-[1.2]">
+                                <a
+                                    href={mainArticle.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-headline"
+                                >
+                                    {mainArticle.title}
+                                </a>
+                            </h1>
+
+                            <div className="mt-1.5 text-[13px] text-muted-foreground">
+                                <span className="font-bold" style={{ color: mainSourceColor }}>
+                                    {mainArticle.source_name}
+                                </span>
+                                {" - "}
+                                {getTimeAgo(mainArticle.crawled_at)}
+                            </div>
+                        </div>
+
+                        {/* Max 100x100 — larger article images are not allowed (NMK rules) */}
+                        {mainArticle.image_url && (
                             <img
                                 src={mainArticle.image_url}
                                 alt=""
-                                className="w-[140px] h-[140px] rounded-2xl object-cover bg-muted shadow-xl"
+                                className="w-[100px] h-[100px] shrink-0 object-cover bg-muted border border-border"
+                                ref={hideIfBroken}
+                                onError={hideOnError}
                             />
-                        ) : (
-                            <div className="w-[140px] h-[140px] rounded-2xl bg-muted flex items-center justify-center text-muted-foreground">
-                                Nuk ka imazh
-                            </div>
                         )}
                     </div>
 
-                    <h1 className="text-2xl md:text-3xl font-black leading-tight tracking-tight mb-4">
-                        {mainArticle.title}
-                    </h1>
+                    {mainArticle.content && (
+                        <p className="mt-3 text-[15px] leading-[1.5]">
+                            {mainArticle.content}...
+                        </p>
+                    )}
 
-                    <p className="text-muted-foreground text-base leading-relaxed mb-6 px-2">
-                        {mainArticle.content}...
-                    </p>
-
-                    <div className="flex flex-col items-center gap-4">
-                        <div className="flex items-center gap-2 text-sm">
-                            <span
-                                className="font-bold uppercase tracking-tight"
-                                style={{ color: mainSourceColor }}
-                            >
-                                {mainArticle.source_name}
-                            </span>
-                            <span className="text-muted-foreground">·</span>
-                            <span className="text-muted-foreground">
-                                {getTimeAgo(mainArticle.crawled_at)}
-                            </span>
-                        </div>
-
-                        <a
-                            href={mainArticle.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 bg-[#3b82f6] hover:bg-[#2563eb] !text-white px-8 py-3 rounded-full font-bold text-sm shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
-                        >
-                            Lexo artikullin <ExternalLink size={16} />
-                        </a>
-                    </div>
+                    <a
+                        href={mainArticle.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-3 inline-flex items-center h-9 px-4 rounded-sm bg-primary text-primary-foreground text-[14px] font-bold hover:no-underline"
+                    >
+                        Lexo artikullin »
+                    </a>
                 </div>
             )}
 
@@ -113,15 +117,10 @@ export function ClusterDetailContent({
 
             {/* Other Articles List */}
             {otherArticles.length > 0 && (
-                <div className="mt-16">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="w-1 h-6 bg-primary rounded-full" />
-                        <h2 className="text-lg font-bold">
-                            {articleCount - 1} lajme tjera
-                        </h2>
-                    </div>
+                <section className="mt-6">
+                    <TabHeading title={`${articleCount - 1} lajme tjera`} />
 
-                    <div className="space-y-4">
+                    <ul>
                         {otherArticles.map((article) => {
                             const baseColor =
                                 SOURCE_COLORS[article.source_name] || "#3b82f6";
@@ -130,47 +129,46 @@ export function ClusterDetailContent({
                                 isDarkMode
                             );
                             return (
-                                <a
+                                <li
                                     key={article.id}
-                                    href={article.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex gap-4 p-4 rounded-2xl bg-card border border-border hover:border-primary/30 transition-all group"
+                                    className="py-2.5 flex gap-3 border-b border-dotted border-border last:border-b-0"
                                 >
                                     <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 mb-1.5">
+                                        <a
+                                            href={article.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-headline"
+                                        >
+                                            <h3 className="text-[15px] font-bold leading-[1.3]">
+                                                {article.title}
+                                            </h3>
+                                        </a>
+                                        <div className="mt-0.5 text-[12px] text-muted-foreground">
                                             <span
-                                                className="text-xs font-bold uppercase"
-                                                style={{
-                                                    color: articleSourceColor,
-                                                }}
+                                                className="font-bold"
+                                                style={{ color: articleSourceColor }}
                                             >
                                                 {article.source_name}
                                             </span>
-                                        </div>
-                                        <h3 className="text-[15px] font-bold leading-snug group-hover:underline decoration-1 transition-all mb-2">
-                                            {article.title}
-                                        </h3>
-                                        <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                                            <span>
-                                                {getTimeAgo(article.crawled_at)}
-                                            </span>
-                                            <span>·</span>
-                                            <ExternalLink size={10} />
+                                            {" - "}
+                                            {getTimeAgo(article.crawled_at)}
                                         </div>
                                     </div>
                                     {article.image_url && (
                                         <img
                                             src={article.image_url}
                                             alt=""
-                                            className="w-20 h-20 rounded-lg object-cover bg-muted shrink-0"
+                                            className="w-16 h-16 shrink-0 object-cover bg-muted border border-border"
+                                            ref={hideIfBroken}
+                                            onError={hideOnError}
                                         />
                                     )}
-                                </a>
+                                </li>
                             );
                         })}
-                    </div>
-                </div>
+                    </ul>
+                </section>
             )}
         </>
     );

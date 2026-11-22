@@ -1,12 +1,10 @@
 import { ClusterDetailContent } from "@/components/cluster-detail-content";
-import { Logo } from "@/components/logo";
 import { SiteFooter } from "@/components/site-footer";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { getCluster } from "@/lib/api";
 import { isCountryCode } from "@/lib/country";
 import { CategoryKey } from "@/lib/constants";
 import { BackButton } from "@/components/back-button";
-import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -40,9 +38,9 @@ export default async function ClusterPage({
     } catch (e) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center p-4">
-                <p className="text-red-500 font-bold mb-4">Nuk u gjet ky grup lajmesh.</p>
-                <Link href="/" className="text-primary hover:underline flex items-center gap-1">
-                    <ChevronLeft size={20} /> Kthehu në ballinë
+                <p className="text-hot font-bold mb-3">Nuk u gjet ky grup lajmesh.</p>
+                <Link href="/" className="font-bold text-primary">
+                    « Kthehu në ballinë
                 </Link>
             </div>
         );
@@ -53,30 +51,28 @@ export default async function ClusterPage({
     const categoryKey = (cluster.category?.toLowerCase() || "vendi") as CategoryKey;
 
     return (
-        <div className="min-h-screen bg-background">
-            {/* Header (Same as Page) */}
-            <header className="border-b border-border bg-card sticky top-0 z-50">
-                <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-                    <Link href="/" className="flex items-center gap-2">
-                        <Logo width={32} height={32} />
-                        <span className="font-serif text-[22px] font-bold tracking-tight hidden sm:inline">Klasteri</span>
+        <div className="min-h-screen bg-background flex flex-col">
+            {/* The section bar's slab, with the story's size where the sections would be. */}
+            <header className="bg-brand text-white sticky top-0 z-50">
+                <div className="relative max-w-3xl mx-auto px-4 h-11 flex items-center justify-between">
+                    <Link href="/" className="font-display text-[24px] font-bold leading-none hover:no-underline">
+                        Klasteri
                     </Link>
 
-                    {/* Total Articles Count (Mobile Style) */}
-                    <div className="absolute left-1/2 -translate-x-1/2 text-sm font-medium text-muted-foreground whitespace-nowrap">
+                    <div className="absolute left-1/2 -translate-x-1/2 font-display text-[15px] font-bold uppercase whitespace-nowrap">
                         {cluster.article_count} lajme
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        <Link href="/" className="text-sm font-medium text-muted-foreground hover:text-foreground hidden sm:inline">
-                            Ballina
+                    <div className="flex items-center gap-3">
+                        <Link href="/" className="text-[13px] font-bold hidden sm:inline">
+                            Ballina »
                         </Link>
-                        <ThemeToggle />
+                        <ThemeToggle on="bar" />
                     </div>
                 </div>
             </header>
 
-            <main className="max-w-2xl mx-auto px-4 py-8">
+            <main className="w-full flex-1 max-w-3xl mx-auto px-4 py-4">
                 {/* Back Button */}
                 <BackButton />
 

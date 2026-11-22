@@ -52,14 +52,14 @@ export function SearchBar() {
             {/* Desktop Search Bar */}
             <form onSubmit={handleSubmit} className="hidden md:flex items-center">
                 <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                     <input
                         ref={inputRef}
                         type="text"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         placeholder="Kërko lajme..."
-                        className="w-48 pl-9 pr-3 py-1.5 text-sm bg-muted rounded-md border border-transparent focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors placeholder:text-muted-foreground"
+                        className="w-44 h-8 pl-7 pr-2 text-[13px] bg-background rounded-sm border border-border focus:border-primary focus:outline-none placeholder:text-muted-foreground"
                     />
                 </div>
             </form>
@@ -67,37 +67,38 @@ export function SearchBar() {
             {/* Mobile Search Icon */}
             <button
                 onClick={openMobileSearch}
-                className="md:hidden p-2 text-foreground/60 hover:text-foreground transition-colors"
+                className="md:hidden flex items-center justify-center w-8 h-8 rounded-sm border border-border text-muted-foreground hover:bg-muted hover:text-foreground"
                 aria-label="Kërko"
             >
-                <Search className="h-5 w-5" />
+                <Search className="h-4 w-4" />
             </button>
 
             {/* Mobile Search Overlay */}
             {isMobileOpen && (
                 <div className="fixed inset-0 z-[100] bg-background md:hidden">
-                    <form onSubmit={handleSubmit} className="h-14 flex items-center gap-3 px-4 border-b border-border">
+                    <form onSubmit={handleSubmit} className="h-14 flex items-center gap-2 px-4 border-b-2 border-brand">
                         <button
                             type="button"
                             onClick={closeMobileSearch}
-                            className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+                            className="p-1 text-muted-foreground hover:text-foreground"
                             aria-label="Mbyll"
                         >
                             <X className="h-5 w-5" />
                         </button>
                         <div className="flex-1 relative">
+                            {/* 16px: anything smaller makes iOS Safari zoom the page on focus. */}
                             <input
                                 ref={mobileInputRef}
                                 type="text"
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 placeholder="Kërko lajme..."
-                                className="w-full py-2 px-3 text-base bg-muted rounded-md border border-transparent focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors placeholder:text-muted-foreground"
+                                className="w-full h-9 px-2.5 text-base bg-background rounded-sm border border-border focus:border-primary focus:outline-none placeholder:text-muted-foreground"
                             />
                         </div>
                         <button
                             type="submit"
-                            className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                            className="h-9 px-4 text-[13px] font-bold bg-primary text-primary-foreground rounded-sm"
                         >
                             Kërko
                         </button>

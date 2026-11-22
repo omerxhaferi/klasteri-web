@@ -1,10 +1,11 @@
 "use client";
 
 import { DailySummary, getSummaryAudioUrl } from "@/lib/api";
-import { X, Sparkles, Clock, ArrowRight, Square, BookOpen, Volume2, Pause, Play } from "lucide-react";
+import { X, Square, Volume2, Pause, Play } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { TabHeading } from "@/components/tab-heading";
 
 function getSummaryTimeLabel(createdAt: string): string {
     const date = new Date(createdAt.replace("Z", ""));
@@ -46,16 +47,16 @@ function formatSummaryText(text: string): React.ReactNode[] {
             if (part.startsWith('**') && part.endsWith('**')) {
                 const boldText = part.slice(2, -2);
                 return (
-                    <span key={partIdx} className="font-semibold text-primary">
+                    <strong key={partIdx} className="font-bold">
                         {boldText}
-                    </span>
+                    </strong>
                 );
             }
             return part;
         });
 
         return (
-            <p key={idx} className="mb-5 last:mb-0 text-[15px] leading-7">
+            <p key={idx} className="mb-4 last:mb-0 text-[15px] leading-[1.55]">
                 {rendered}
             </p>
         );
@@ -210,11 +211,10 @@ export function SummaryPlayerCard({ summary }: SummaryPlayerCardProps) {
     return (
         <>
             {/* Summary Player Card */}
-            <div className="rounded-xl bg-primary/4 dark:bg-primary/8 border border-primary/15 px-3 py-2.5">
+            <div className="bg-muted border border-border px-2.5 py-2">
                 {/* Top row */}
                 <div className="flex items-center gap-2">
-                    <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
-                    <span className="text-[12px] font-semibold text-foreground truncate flex-1">
+                    <span className="text-[13px] font-bold truncate flex-1">
                         {timeLabel}
                     </span>
 
@@ -222,39 +222,40 @@ export function SummaryPlayerCard({ summary }: SummaryPlayerCardProps) {
                         <>
                             <button
                                 onClick={togglePause}
-                                className="w-6 h-6 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center shrink-0 transition-colors"
+                                aria-label={isPaused ? "Vazhdo" : "Ndalo përkohësisht"}
+                                className="w-6 h-6 rounded-sm border border-border bg-background flex items-center justify-center shrink-0 text-primary hover:bg-accent"
                             >
                                 {isPaused ? (
-                                    <Play className="h-2.5 w-2.5 fill-primary text-primary ml-0.5" />
+                                    <Play className="h-2.5 w-2.5 fill-current" />
                                 ) : (
-                                    <Pause className="h-2.5 w-2.5 fill-primary text-primary" />
+                                    <Pause className="h-2.5 w-2.5 fill-current" />
                                 )}
                             </button>
                             <button
                                 onClick={stopAudio}
-                                className="w-6 h-6 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center shrink-0 transition-colors"
+                                aria-label="Ndalo"
+                                className="w-6 h-6 rounded-sm border border-border bg-background flex items-center justify-center shrink-0 text-primary hover:bg-accent"
                             >
-                                <Square className="h-2 w-2 fill-primary text-primary" />
+                                <Square className="h-2 w-2 fill-current" />
                             </button>
                         </>
                     )}
 
                     <button
                         onClick={() => setIsModalOpen(true)}
-                        className="text-[11px] text-muted-foreground hover:text-foreground font-medium transition-colors shrink-0 flex items-center gap-1"
+                        className="text-[12px] font-bold text-primary hover:underline shrink-0"
                     >
-                        <BookOpen className="h-3 w-3" />
-                        Lexo
+                        Lexo »
                     </button>
 
                     {!playerActive && summary.has_audio && (
                         <button
                             onClick={playAudio}
                             disabled={isLoadingAudio}
-                            className="bg-primary/90 hover:bg-primary text-white rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors shrink-0 flex items-center gap-1.5 disabled:opacity-50"
+                            className="h-6 bg-primary text-primary-foreground rounded-sm px-2 text-[12px] font-bold shrink-0 flex items-center gap-1 disabled:opacity-50"
                         >
                             {isLoadingAudio ? (
-                                <div className="h-3 w-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <div className="h-3 w-3 border-2 border-current/30 border-t-current rounded-full animate-spin" />
                             ) : (
                                 <Volume2 className="h-3 w-3" />
                             )}
@@ -273,14 +274,14 @@ export function SummaryPlayerCard({ summary }: SummaryPlayerCardProps) {
                             ref={progressBarRef}
                             onPointerDown={handlePointerDown}
                             onPointerMove={handlePointerMove}
-                            className="flex-1 h-1.5 bg-muted rounded-full cursor-pointer relative group touch-none"
+                            className="flex-1 h-1.5 bg-background border border-border cursor-pointer relative touch-none"
                         >
                             <div
-                                className="h-full bg-primary/50 rounded-full"
+                                className="h-full bg-primary"
                                 style={{ width: `${progress * 100}%` }}
                             />
                             <div
-                                className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 bg-primary rounded-full shadow-sm"
+                                className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-2 h-3.5 bg-primary"
                                 style={{ left: `${progress * 100}%` }}
                             />
                         </div>
@@ -295,61 +296,60 @@ export function SummaryPlayerCard({ summary }: SummaryPlayerCardProps) {
             {isModalOpen && createPortal(
                 <div className="fixed inset-0 z-9999 flex items-center justify-center p-4">
                     <div
-                        className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+                        className="absolute inset-0 bg-black/60"
                         onClick={handleModalClose}
                     />
 
-                    <div className="relative bg-card border border-border rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
-                        <div className="px-6 py-4 border-b border-border flex items-center justify-between shrink-0">
+                    <div className="relative bg-background border border-border border-t-[3px] border-t-brand shadow-xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
+                        <div className="px-5 py-3 border-b border-border flex items-center justify-between shrink-0">
                             <div>
-                                <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-                                    <Sparkles className="h-5 w-5 text-primary" />
+                                <h2 className="text-[18px] font-bold">
                                     {timeLabel}
                                 </h2>
-                                <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                                    <Clock className="h-3 w-3" />
+                                <p className="text-[12px] text-muted-foreground">
                                     {formatDate(summary.summary_date)}
                                 </p>
                             </div>
                             <button
                                 onClick={handleModalClose}
-                                className="p-2 hover:bg-muted rounded-lg transition-colors"
+                                aria-label="Mbyll"
+                                className="flex items-center justify-center w-8 h-8 rounded-sm border border-border text-muted-foreground hover:bg-muted hover:text-foreground"
                             >
-                                <X className="h-5 w-5 text-muted-foreground" />
+                                <X className="h-4 w-4" />
                             </button>
                         </div>
 
-                        <div className="px-6 py-6 overflow-y-auto flex-1">
-                            <div className="text-muted-foreground">
+                        <div className="px-5 py-5 overflow-y-auto flex-1">
+                            <div>
                                 {formatSummaryText(summary.summary_text)}
                             </div>
 
                             {/* AI Disclaimer */}
-                            <p className="mt-6 text-[11px] text-muted-foreground/60 italic">
+                            <p className="mt-5 text-[11px] text-muted-foreground">
                                 Kjo përmbledhje u gjenerua automatikisht nga inteligjenca artificiale (AI).
                                 Për informacion të plotë, lexoni artikujt origjinalë.
                             </p>
 
                             {summary.clusters && summary.clusters.length > 0 && (
-                                <div className="mt-8 pt-6 border-t border-border">
-                                    <p className="text-sm font-medium text-foreground mb-4">
-                                        Lexo më shumë rreth këtyre temave
-                                    </p>
-                                    <div className="grid gap-2 overflow-hidden">
+                                <div className="mt-6">
+                                    <TabHeading title="Lexo më shumë" as="h3" />
+                                    <ul>
                                         {summary.clusters.slice(0, 6).map((cluster) => (
-                                            <Link
+                                            <li
                                                 key={cluster.id}
-                                                href={`/cluster/${cluster.id}`}
-                                                onClick={() => setIsModalOpen(false)}
-                                                className="group flex items-center gap-3 p-3 bg-muted/50 hover:bg-muted rounded-lg transition-colors min-w-0"
+                                                className="py-1.5 border-b border-dotted border-border flex items-baseline gap-1.5"
                                             >
-                                                <span className="text-sm text-foreground truncate flex-1 min-w-0">
+                                                <span aria-hidden className="shrink-0 text-[8px] leading-none -translate-y-px text-muted-foreground/60">■</span>
+                                                <Link
+                                                    href={`/cluster/${cluster.id}`}
+                                                    onClick={() => setIsModalOpen(false)}
+                                                    className="min-w-0 truncate text-[13px] text-headline"
+                                                >
                                                     {cluster.title}
-                                                </span>
-                                                <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary shrink-0 transition-colors" />
-                                            </Link>
+                                                </Link>
+                                            </li>
                                         ))}
-                                    </div>
+                                    </ul>
                                 </div>
                             )}
                         </div>

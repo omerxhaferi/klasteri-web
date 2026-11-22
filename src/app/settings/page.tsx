@@ -2,6 +2,7 @@ import { getSources, SourceInfo } from "@/lib/api";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { MuteSettings } from "@/components/mute-settings";
+import { TabHeading } from "@/components/tab-heading";
 
 export const dynamic = "force-dynamic";
 
@@ -10,28 +11,27 @@ export default async function SettingsPage() {
     let error: string | null = null;
 
     try {
-        sources = await getSources();
+        // Sorted here, once, and not again in the browser: see MuteSettings.
+        sources = (await getSources()).sort((a, b) => a.name.localeCompare(b.name, "sq"));
     } catch (e) {
         console.error("Failed to fetch sources:", e);
         error = "Nuk mund të merren burimet. Provoni përsëri më vonë.";
     }
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background flex flex-col">
             <SiteHeader />
 
-            <main className="max-w-2xl mx-auto px-4 py-8">
-                <h1 className="font-serif text-[28px] font-bold tracking-tight text-foreground mb-1">
+            <main className="w-full flex-1 max-w-2xl mx-auto px-4 py-5">
+                <h1 className="text-[24px] font-bold leading-tight">
                     Cilësimet
                 </h1>
 
-                <section className="mt-6">
-                    <h2 className="font-serif text-[20px] font-bold tracking-tight text-foreground mb-3 pb-2 border-b-2 border-foreground inline-block">
-                        Burimet
-                    </h2>
+                <section className="mt-4">
+                    <TabHeading title="Burimet" className="mb-3" />
 
                     {error ? (
-                        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-600 dark:text-red-400 text-sm font-medium">
+                        <div className="px-3 py-2.5 border border-hot bg-muted text-hot text-[13px] font-bold">
                             {error}
                         </div>
                     ) : (

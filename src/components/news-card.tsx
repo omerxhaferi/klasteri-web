@@ -3,6 +3,7 @@
 import { Cluster, Article } from "@/lib/api";
 import { CategoryColors, CategoryKey, SOURCE_COLORS } from "@/lib/constants";
 import { getAccessibleColor } from "@/lib/utils";
+import { hideIfBroken, hideOnError } from "@/lib/images";
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
 
@@ -11,6 +12,9 @@ interface NewsCardProps {
 }
 
 const RECENT_THRESHOLD_MINUTES = 18;
+
+/** How many more newsrooms are named before the "edhe N lajme tjera »" link. */
+const MAX_NAMED_SOURCES = 4;
 
 function getTimeAgo(dateString: string): { text: string; isRecent: boolean } {
     const now = new Date();
@@ -49,96 +53,90 @@ function useIsDarkMode() {
     );
 }
 
-/** Source + time meta line under a headline */
+/** "TV21 - 51 min", directly under the headline. */
 function MetaLine({ article, sourceColor }: { article: Article; sourceColor: string }) {
     const timeInfo = getTimeAgo(article.crawled_at);
     return (
-        <div className="flex items-center gap-2 text-[12.5px] text-muted-foreground">
-            <span className="font-bold uppercase tracking-tight" style={{ color: sourceColor }}>
+        <div className="mt-1 text-[12px] text-muted-foreground">
+            <span className="font-bold" style={{ color: sourceColor }}>
                 {article.source_name}
             </span>
-            <span className="text-border">|</span>
-            <span className={timeInfo.isRecent ? "font-semibold text-hot" : ""}>
+            {" - "}
+            <span className={timeInfo.isRecent ? "font-bold text-hot" : ""}>
                 {timeInfo.text}
             </span>
         </div>
     );
 }
 
-/** Up to 3 other sources covering the same story */
-function SubArticles({ articles, color }: { articles: Article[]; color: string }) {
+/**
+ * Up to 3 other newsrooms on the same story: their headline as a link, their
+ * name after it. The bullet turns red while the article is fresh.
+ */
+function SubArticles({ articles }: { articles: Article[] }) {
     if (articles.length === 0) return null;
     return (
-        <div className="mt-3 space-y-1.5">
+        <ul className="mt-2 space-y-[3px]">
             {articles.map((article) => {
                 const isRecent = isRecentArticle(article.crawled_at);
                 return (
-                    <a
-                        key={article.id}
-                        href={article.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-baseline gap-2 group/item relative"
-                    >
-                        {isRecent && (
-                            <span
-                                className="absolute rounded-full bg-hot"
-                                style={{ left: "-10px", top: 2, bottom: 2, width: "3px" }}
-                            />
-                        )}
+                    <li key={article.id} className="flex items-baseline gap-1.5 text-[13px] leading-[1.35]">
                         <span
-                            className="text-[12px] font-bold whitespace-nowrap shrink-0"
-                            style={{ color }}
+                            aria-hidden
+                            className={`shrink-0 text-[8px] leading-none -translate-y-px ${
+                                isRecent ? "text-hot" : "text-muted-foreground/60"
+                            }`}
                         >
+                            ■
+                        </span>
+                        <a
+                            href={article.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="min-w-0 truncate text-headline"
+                        >
+                            {article.title}
+                        </a>
+                        <span className="shrink-0 text-[12px] text-muted-foreground whitespace-nowrap">
                             {article.source_name}
                         </span>
-                        <span className="text-[13px] text-muted-foreground group-hover/item:text-foreground group-hover/item:underline decoration-1 transition-colors truncate flex-1">
-                            {article.title}
-                        </span>
-                    </a>
+                    </li>
                 );
             })}
-        </div>
+        </ul>
     );
 }
 
-/** Stacked source-color dots + "N lajme tjera" link into the cluster */
-function CoverageLink({ cluster, isDarkMode }: { cluster: Cluster; isDarkMode: boolean }) {
+/**
+ * The rest of the coverage: a few more newsrooms by name, then the link into
+ * the cluster. Names, not coloured dots — a name says who else has the story.
+ */
+function CoverageLine({ cluster }: { cluster: Cluster }) {
     const remaining = Math.max(0, cluster.article_count - 4);
     if (remaining < 1) return null;
 
-    const dotColors: string[] = [];
-    const seen = new Set<string>();
+    const shown = new Set(cluster.articles.slice(0, 4).map((a) => a.source_name));
+    const names: string[] = [];
     for (const a of cluster.articles.slice(4)) {
-        if (dotColors.length >= 5) break;
-        if (!seen.has(a.source_name)) {
-            seen.add(a.source_name);
-            const base = SOURCE_COLORS[a.source_name] || "#6b7280";
-            dotColors.push(getAccessibleColor(base, isDarkMode));
+        if (names.length >= MAX_NAMED_SOURCES) break;
+        if (!shown.has(a.source_name)) {
+            shown.add(a.source_name);
+            names.push(a.source_name);
         }
     }
 
     return (
-        <Link
-            href={`/cluster/${cluster.id}`}
-            className="mt-3 inline-flex items-center gap-2 group/cov hover:no-underline"
-        >
-            {dotColors.length > 0 && (
-                <span className="flex -space-x-1">
-                    {dotColors.map((c, i) => (
-                        <span
-                            key={i}
-                            className="w-2.5 h-2.5 rounded-full ring-2 ring-background"
-                            style={{ backgroundColor: c }}
-                        />
-                    ))}
-                </span>
+        <div className="mt-1.5 flex flex-wrap items-baseline gap-x-1.5 text-[12px] text-muted-foreground">
+            {names.length > 0 && (
+                <span className="hidden sm:inline">{names.join(" · ")} ·</span>
             )}
-            <span className="text-[12.5px] font-semibold text-muted-foreground group-hover/cov:text-foreground transition-colors">
-                edhe {remaining} lajme tjera
-                <span className="ml-0.5">›</span>
-            </span>
-        </Link>
+            <Link
+                href={`/cluster/${cluster.id}`}
+                className="font-bold text-primary whitespace-nowrap"
+            >
+                edhe {remaining} lajme tjera »
+            </Link>
+        </div>
     );
 }
 
@@ -155,35 +153,33 @@ export function NewsCard({ cluster }: NewsCardProps) {
 
     const baseSourceColor = SOURCE_COLORS[mainArticle.source_name] || categoryColor;
     const mainSourceColor = getAccessibleColor(baseSourceColor, isDarkMode);
-    // Uniform accent for similar publishers so the main one's brand color stands out
-    const subSourceColor = "var(--primary)";
 
     const description = mainArticle.content
         ? (mainArticle.content.length >= 200 ? mainArticle.content.slice(0, 200) + "..." : mainArticle.content)
         : "";
 
     return (
-        <article className="py-5 border-b border-border last:border-b-0">
-            <div className="flex gap-5">
+        <article className="py-3.5 border-b border-border last:border-b-0">
+            <div className="flex gap-4">
                 <div className="flex-1 min-w-0">
                     <a
                         href={mainArticle.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block group mb-1.5"
+                        className="text-headline"
                     >
-                        <h3 className="font-serif text-[19px] font-bold leading-snug tracking-tight text-foreground group-hover:underline decoration-1 underline-offset-2">
+                        <h3 className="text-[17px] md:text-[18px] font-bold leading-[1.25]">
                             {mainArticle.title}
                         </h3>
                     </a>
 
+                    <MetaLine article={mainArticle} sourceColor={mainSourceColor} />
+
                     {description && (
-                        <p className="hidden md:block mb-2 text-[13.5px] text-muted-foreground leading-relaxed line-clamp-2">
+                        <p className="hidden md:block mt-1.5 text-[13px] leading-[1.45] line-clamp-2">
                             {description}
                         </p>
                     )}
-
-                    <MetaLine article={mainArticle} sourceColor={mainSourceColor} />
                 </div>
 
                 {/* Max 100x100 — larger article images are not allowed (NMK rules) */}
@@ -197,17 +193,16 @@ export function NewsCard({ cluster }: NewsCardProps) {
                         <img
                             src={mainArticle.image_url}
                             alt=""
-                            className="w-[100px] h-[100px] rounded-xl object-cover bg-muted shadow-sm"
-                            onError={(e) => {
-                                (e.target as HTMLImageElement).style.display = "none";
-                            }}
+                            className="w-[100px] h-[100px] object-cover bg-muted border border-border"
+                            ref={hideIfBroken}
+                            onError={hideOnError}
                         />
                     </a>
                 )}
             </div>
 
-            <SubArticles articles={subArticles} color={subSourceColor} />
-            <CoverageLink cluster={cluster} isDarkMode={isDarkMode} />
+            <SubArticles articles={subArticles} />
+            <CoverageLine cluster={cluster} />
         </article>
     );
 }

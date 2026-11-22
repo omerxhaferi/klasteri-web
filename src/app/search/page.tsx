@@ -4,7 +4,6 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { cookies } from "next/headers";
 import { MUTED_COOKIE, parseMutedCookie, applyMutesToClusters } from "@/lib/mutes";
-import { Search } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
 
@@ -35,15 +34,14 @@ export default async function SearchPage({
     }
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background flex flex-col">
             <SiteHeader />
 
-            <main className="max-w-5xl mx-auto px-4 py-6">
+            <main className="w-full flex-1 max-w-3xl mx-auto px-4 py-5">
                 {/* No query provided */}
                 {!query && (
-                    <div className="py-20 text-center">
-                        <Search className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                        <h1 className="text-xl font-bold text-foreground mb-2">Kërko lajme</h1>
+                    <div className="py-12">
+                        <h1 className="text-[20px] font-bold mb-1">Kërko lajme</h1>
                         <p className="text-muted-foreground">
                             Shkruani termin në kutinë e kërkimit për të gjetur lajme.
                         </p>
@@ -52,9 +50,8 @@ export default async function SearchPage({
 
                 {/* Query too short */}
                 {query && query.length < 2 && (
-                    <div className="py-20 text-center">
-                        <Search className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                        <h1 className="text-xl font-bold text-foreground mb-2">Termi i shkurtër</h1>
+                    <div className="py-12">
+                        <h1 className="text-[20px] font-bold mb-1">Termi i shkurtër</h1>
                         <p className="text-muted-foreground">
                             Termi i kërkimit duhet të ketë të paktën 2 karaktere.
                         </p>
@@ -63,7 +60,7 @@ export default async function SearchPage({
 
                 {/* Error state */}
                 {error && (
-                    <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-600 dark:text-red-400 text-sm font-medium">
+                    <div className="mb-5 px-3 py-2.5 border border-hot bg-muted text-hot text-[13px] font-bold">
                         {error}
                     </div>
                 )}
@@ -71,11 +68,13 @@ export default async function SearchPage({
                 {/* Search results */}
                 {searchResult && (
                     <>
-                        <div className="mb-6">
-                            <h1 className="text-xl font-bold text-foreground mb-1">
+                        {/* Not a TabHeading: a tab is uppercase, and a reader's own
+                            words should come back exactly as they typed them. */}
+                        <div className="pb-1.5 border-b-2 border-tab flex items-baseline justify-between gap-3">
+                            <h1 className="text-[20px] font-bold leading-tight">
                                 Rezultatet për &quot;{searchResult.query}&quot;
                             </h1>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-[12px] text-muted-foreground whitespace-nowrap">
                                 {searchResult.total_count === 0
                                     ? "Asnjë rezultat"
                                     : `${searchResult.total_count} grupe lajmesh u gjetën`}
@@ -84,12 +83,11 @@ export default async function SearchPage({
 
                         {/* No results */}
                         {searchResult.clusters.length === 0 && (
-                            <div className="py-16 text-center">
-                                <Search className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                                <p className="text-muted-foreground">
+                            <div className="py-10">
+                                <p>
                                     Nuk u gjetën lajme për &quot;{searchResult.query}&quot;.
                                 </p>
-                                <p className="text-sm text-muted-foreground mt-2">
+                                <p className="text-muted-foreground mt-1">
                                     Provoni me terma të tjerë.
                                 </p>
                             </div>
@@ -97,7 +95,7 @@ export default async function SearchPage({
 
                         {/* Results list */}
                         {searchResult.clusters.length > 0 && (
-                            <div className="space-y-4">
+                            <div>
                                 {searchResult.clusters.map((cluster) => (
                                     <NewsCard key={cluster.id} cluster={cluster} />
                                 ))}

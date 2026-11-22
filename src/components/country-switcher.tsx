@@ -124,9 +124,8 @@ export function CountrySwitcher() {
                 aria-expanded={open}
                 aria-label={`Shteti: ${active.label}`}
                 disabled={pending}
-                className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium
-                           text-foreground/80 transition-colors hover:bg-foreground/5
-                           hover:text-foreground disabled:opacity-50"
+                className="flex h-8 items-center gap-1.5 rounded-sm border border-border px-2
+                           text-[13px] hover:bg-muted disabled:opacity-50"
             >
                 {/*
                  * Deliberately unnamed. The button already carries
@@ -138,7 +137,7 @@ export function CountrySwitcher() {
                 <CountryMark code={active.code} size={18} className="shrink-0" />
                 <span className="hidden sm:inline">{active.label}</span>
                 <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden
-                     className={`transition-transform ${open ? 'rotate-180' : ''}`}>
+                     className={`text-muted-foreground ${open ? 'rotate-180' : ''}`}>
                     <path d="M1 3l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5"
                           strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -166,8 +165,8 @@ export function CountrySwitcher() {
                 <div
                     role="listbox"
                     aria-label="Zgjidh shtetin"
-                    className="absolute right-0 z-[60] mt-1 min-w-[12.5rem] overflow-hidden rounded-lg
-                               border border-foreground/10 bg-background shadow-lg"
+                    className="absolute right-0 z-[60] mt-1 min-w-[12.5rem] overflow-hidden rounded-sm
+                               border border-border bg-background shadow-md"
                 >
                     {COUNTRIES.map((c) => (
                         <button
@@ -177,8 +176,8 @@ export function CountrySwitcher() {
                             aria-selected={c.code === current}
                             onClick={() => choose(c.code)}
                             className={`flex w-full items-center gap-2 whitespace-nowrap px-3 py-2
-                                        text-left text-sm transition-colors hover:bg-foreground/5
-                                        ${c.code === current ? 'font-semibold' : 'text-foreground/80'}`}
+                                        text-left text-[13px] hover:bg-muted
+                                        ${c.code === current ? 'font-bold' : ''}`}
                         >
                             {/*
                              * Also unnamed: `c.label` on the next line is always

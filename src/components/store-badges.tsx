@@ -22,16 +22,9 @@ export function GooglePlayIcon(props: SVGProps<SVGSVGElement>) {
 }
 
 /**
- * Store links. `solid` is the in-feed call to action; `quiet` matches the
- * muted text links already in the footer.
- *
- * Two globals.css quirks shape this:
- *  - `a { color: inherit }` is unlayered, and unlayered CSS wins over Tailwind's
- *    layered utilities, so a `text-*` class on an <a> does nothing. Colour is
- *    therefore set inline on the solid buttons, and inherited from the wrapper
- *    on the quiet ones (the same way the existing footer links get their tone).
- *  - `a:hover { text-decoration: underline }` applies to everything, hence
- *    `hover:no-underline` on the buttons.
+ * Store links. `solid` is the in-feed call to action: two plain buttons.
+ * `quiet` is a pair of text links that take the colour of whatever they sit
+ * in — white in the footer.
  */
 export function StoreButtons({
     variant = "solid",
@@ -43,23 +36,16 @@ export function StoreButtons({
     const isSolid = variant === "solid";
 
     const linkClass = isSolid
-        ? "flex-1 inline-flex items-center justify-center gap-1.5 bg-primary hover:bg-primary/90 rounded-lg px-3 py-2 text-[12.5px] font-semibold transition-colors hover:no-underline"
-        : "inline-flex items-center gap-1.5 transition-opacity hover:opacity-70 hover:no-underline";
-
-    const linkStyle = isSolid
-        ? { color: "var(--primary-foreground)" }
-        : undefined;
+        ? "flex-1 inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground rounded-sm px-3 h-8 text-[13px] font-bold hover:no-underline"
+        : "inline-flex items-center gap-1.5 font-bold text-white";
 
     return (
-        <div
-            className={`flex ${isSolid ? "gap-2" : "gap-5 text-sm text-muted-foreground"} ${className}`}
-        >
+        <div className={`flex ${isSolid ? "gap-2" : "gap-4"} ${className}`}>
             <a
                 href={APP_STORE_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={linkClass}
-                style={linkStyle}
             >
                 <AppleIcon className="h-3.5 w-3.5" />
                 App Store
@@ -69,7 +55,6 @@ export function StoreButtons({
                 target="_blank"
                 rel="noopener noreferrer"
                 className={linkClass}
-                style={linkStyle}
             >
                 <GooglePlayIcon className="h-3.5 w-3.5" />
                 Google Play

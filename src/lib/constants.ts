@@ -1,10 +1,18 @@
+/**
+ * One colour per section: the cap on its tab in the section bar and the fill
+ * of its heading tab in the feed (components/tab-heading.tsx).
+ *
+ * Each one carries WHITE text there, so every value clears 4.5:1 against
+ * white. That is why these are deeper than the mobile app's versions of the
+ * same hues — an amber or a cyan bright enough for a dot cannot hold a label.
+ */
 export const CategoryColors = {
-    top_overall: '#1e3a5f', // Primary theme color
-    vendi: '#dc5661ff',    // Reddish
-    rajoni: '#f59e0b',   // Amber
-    bota: '#8b5cf6',     // Purple
-    sport: '#10b981',    // Green
-    tech: '#06b6d4',     // Cyan
+    top_overall: 'var(--primary)', // the brand accent (teal)
+    vendi: '#c62828',       // red
+    rajoni: '#b45309',      // amber
+    bota: '#6d28d9',        // purple
+    sport: '#15803d',       // green
+    tech: '#0e7490',        // teal
 } as const;
 
 export type CategoryKey = keyof typeof CategoryColors;
@@ -37,11 +45,14 @@ export type CategoryKey = keyof typeof CategoryColors;
  * different dot while staying the same colour. Two constraints bound that
  * nudge and both are measured, not guessed:
  *
- *  - Contrast. These render as small dots, bars and borders, so a colour must
- *    survive both `--background` values (#faf9f5 and #131211). Every entry
- *    added here clears 2:1 on each. That floor is what darkened Monitor's
- *    yellow (#F7CF14 vanishes on white at 1.44:1).
- *  - Dark mode. `getAccessibleColor()` in lib/utils.ts lightens anything below
+ *  - Contrast. A colour must survive both `--background` values (#ffffff and
+ *    #14171c). Every entry added here clears 2:1 on each. That floor is what
+ *    darkened Monitor's yellow (#F7CF14 vanishes on white at 1.44:1).
+ *  - Light mode. The colours are now only ever TEXT (the publisher's name
+ *    under a headline), and 2:1 is not enough to read 12px type, so
+ *    `getAccessibleColor()` in lib/utils.ts darkens anything under 4.5:1 on
+ *    white, keeping its hue. The values here stay the real brand colours.
+ *  - Dark mode. `getAccessibleColor()` lightens anything below
  *    0.4 luminance as `channel * 1.6 + 60`, which CLAMPS the red channel of a
  *    saturated red to 255 — so two reds are told apart in dark mode only by
  *    their green and blue channels, and differing in lightness alone does

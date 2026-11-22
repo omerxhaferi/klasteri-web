@@ -3,8 +3,8 @@
 import type { Article, Beat } from "@/lib/api";
 import { SOURCE_COLORS } from "@/lib/constants";
 import { getAccessibleColor } from "@/lib/utils";
-import { ExternalLink } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { TabHeading } from "@/components/tab-heading";
 
 const ALBANIAN_MONTHS_SHORT = [
     "jan", "shk", "mar", "pri", "maj", "qer",
@@ -49,14 +49,11 @@ export function ClusterTimeline({ beats, articles }: Props) {
     if (!beats || beats.length <= 1) return null;
 
     return (
-        <section className="mt-12">
-            <div className="flex items-center gap-3 mb-6">
-                <div className="w-1 h-6 bg-primary rounded-full" />
-                <h2 className="text-lg font-bold">Si u zhvillua lajmi</h2>
-            </div>
+        <section className="mt-2">
+            <TabHeading title="Si u zhvillua lajmi" className="mb-4" />
 
-            <ol className="relative pl-6">
-                <span className="absolute left-[7px] top-1 bottom-1 w-px bg-border" />
+            <ol className="relative pl-5">
+                <span className="absolute left-[4px] top-1 bottom-1 w-px bg-border" />
                 {beats.map((beat, idx) => {
                     const anchor = articleById.get(beat.anchor_article_id);
                     const baseColor = anchor
@@ -70,63 +67,53 @@ export function ClusterTimeline({ beats, articles }: Props) {
                     const isOpen = expanded[idx] ?? false;
 
                     return (
-                        <li key={idx} className="relative pb-6 last:pb-0">
+                        <li key={idx} className="relative pb-4 last:pb-0">
+                            {/* A filled square where the story broke, an open one for each update. */}
                             <span
-                                className={`absolute -left-6 top-1 w-3 h-3 rounded-full border-2 ${
-                                    isBreak
-                                        ? "bg-primary border-primary"
-                                        : "bg-card border-primary"
+                                className={`absolute -left-5 top-[3px] w-[9px] h-[9px] border-2 border-hot ${
+                                    isBreak ? "bg-hot" : "bg-background"
                                 }`}
                             />
 
-                            <div className="flex items-center gap-2 text-[11px] text-muted-foreground mb-1.5">
-                                <span className="font-mono">
+                            <div className="text-[12px] text-muted-foreground">
+                                <span className="font-bold text-foreground tabular-nums">
                                     {formatBeatTime(beat.timestamp)}
                                 </span>
-                                <span>·</span>
-                                <span>{formatBeatDate(beat.timestamp)}</span>
-                                <span
-                                    className={`ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                                        isBreak
-                                            ? "bg-primary/15 text-primary"
-                                            : "bg-muted text-foreground/70"
-                                    }`}
-                                >
+                                {" - "}
+                                {formatBeatDate(beat.timestamp)}
+                                {" - "}
+                                <span className={`font-bold ${isBreak ? "text-hot" : ""}`}>
                                     {isBreak ? "Filloi" : "Përditësim"}
                                 </span>
                             </div>
 
                             {anchor ? (
-                                <a
-                                    href={anchor.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="block group"
-                                >
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <span
-                                            className="text-[11px] font-bold uppercase tracking-tight"
-                                            style={{ color: sourceColor }}
-                                        >
-                                            {anchor.source_name}
-                                        </span>
-                                        <ExternalLink
-                                            size={11}
-                                            className="text-muted-foreground"
-                                        />
+                                <>
+                                    <a
+                                        href={anchor.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-headline"
+                                    >
+                                        <h3 className="mt-0.5 text-[15px] font-bold leading-[1.3]">
+                                            {beat.label || anchor.title}
+                                        </h3>
+                                    </a>
+                                    <div
+                                        className="mt-0.5 text-[12px] font-bold"
+                                        style={{ color: sourceColor }}
+                                    >
+                                        {anchor.source_name}
                                     </div>
-                                    <h3 className="text-[15px] font-bold leading-snug group-hover:underline decoration-1">
-                                        {beat.label || anchor.title}
-                                    </h3>
-                                </a>
+                                </>
                             ) : (
-                                <h3 className="text-[15px] font-bold leading-snug">
+                                <h3 className="mt-0.5 text-[15px] font-bold leading-[1.3]">
                                     {beat.label}
                                 </h3>
                             )}
 
                             {copies.length > 0 && (
-                                <div className="mt-2">
+                                <div className="mt-1">
                                     <button
                                         type="button"
                                         onClick={() =>
@@ -135,13 +122,13 @@ export function ClusterTimeline({ beats, articles }: Props) {
                                                 [idx]: !isOpen,
                                             }))
                                         }
-                                        className="text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+                                        className="text-[12px] text-primary hover:underline"
                                     >
-                                        +{copies.length} burime tjera
+                                        +{copies.length} burime tjera{" "}
                                         <span aria-hidden>{isOpen ? "▴" : "▾"}</span>
                                     </button>
                                     {isOpen && (
-                                        <ul className="mt-2 ml-1 flex flex-wrap gap-x-3 gap-y-1">
+                                        <ul className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5">
                                             {copies.map((c) => {
                                                 const cBase =
                                                     SOURCE_COLORS[c.source_name] ||
@@ -156,7 +143,7 @@ export function ClusterTimeline({ beats, articles }: Props) {
                                                             href={c.url}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="text-[11px] font-bold uppercase tracking-tight hover:underline"
+                                                            className="text-[12px] font-bold"
                                                             style={{ color: cColor }}
                                                         >
                                                             {c.source_name}

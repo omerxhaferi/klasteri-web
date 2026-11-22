@@ -26,6 +26,7 @@ import {
 } from "@/lib/api";
 import { NewsCard } from "@/components/news-card";
 import { FuelPricesCard } from "@/components/fuel-prices-card";
+import { TabHeading } from "@/components/tab-heading";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { TonightSidebar } from "@/components/tonight-sidebar";
@@ -41,24 +42,17 @@ import Link from "next/link";
 
 function SectionHeader({ title, color, moreHref }: { title: string; color?: string; moreHref?: string }) {
   return (
-    <div className="flex items-center gap-3">
-      <span
-        className="w-[5px] h-[20px] rounded-sm shrink-0"
-        style={{ backgroundColor: color || 'var(--primary)' }}
-      />
-      <h2 className="font-serif text-[22px] font-bold tracking-tight text-foreground leading-none">
-        {title.charAt(0).toUpperCase() + title.slice(1).toLowerCase()}
-      </h2>
-      <div className="flex-1 h-px bg-border" />
-      {moreHref && (
-        <Link
-          href={moreHref}
-          className="text-[12px] font-semibold text-muted-foreground hover:text-foreground whitespace-nowrap"
-        >
-          Më shumë ›
-        </Link>
-      )}
-    </div>
+    <TabHeading
+      title={title}
+      color={color}
+      right={
+        moreHref && (
+          <Link href={moreHref} className="font-bold text-primary">
+            më shumë »
+          </Link>
+        )
+      }
+    />
   );
 }
 
@@ -66,7 +60,7 @@ function CategorySection({ title, clusters, color, moreHref }: { title: string; 
   if (clusters.length === 0) return null;
 
   return (
-    <section className="mt-9">
+    <section className="mt-7">
       <SectionHeader title={title} color={color} moreHref={moreHref} />
       <div>
         {clusters.map((cluster) => (
@@ -168,7 +162,7 @@ export async function HomeFeed({ country, base, category, previewSummary = false
   const hasFuel = !!fuelPrices && fuelPrices.prices.length > 0;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <SiteHeader
         selectedCategory={selectedCategory}
         base={base}
@@ -195,12 +189,12 @@ export async function HomeFeed({ country, base, category, previewSummary = false
         <AppDownloadBanner />
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-600 dark:text-red-400 text-sm font-medium">
+          <div className="mb-5 px-3 py-2.5 border border-hot bg-muted text-hot text-[13px] font-bold">
             {error}
           </div>
         )}
 
-        <div className="flex gap-8">
+        <div className="flex gap-7">
           {/* Left Sidebar - Trending + Summary Player */}
           <TonightSidebar
             clusters={tonightClusters}
@@ -219,7 +213,7 @@ export async function HomeFeed({ country, base, category, previewSummary = false
                 ))}
 
                 {/* Mobile fuel prices, above Titujt kryesor as in the desktop sidebar */}
-                {hasFuel && <FuelPricesCard data={fuelPrices!} className="lg:hidden mt-6 mb-6" />}
+                {hasFuel && <FuelPricesCard data={fuelPrices!} className="lg:hidden mt-5 mb-5" />}
 
                 {/* Mobile Titujt kryesor - after the top stories */}
                 <TonightMobileCombined
@@ -251,7 +245,7 @@ export async function HomeFeed({ country, base, category, previewSummary = false
 
             {((selectedCategory === "all" && Object.values(homepageData).every(arr => arr.length === 0)) ||
               (selectedCategory !== "all" && categoryData.length === 0)) && !error && (
-                <div className="py-20 text-center text-muted-foreground">
+                <div className="py-16 text-center text-muted-foreground">
                   Nuk ka lajme për momentin.
                 </div>
               )}
@@ -259,12 +253,12 @@ export async function HomeFeed({ country, base, category, previewSummary = false
 
           {/* Right Sidebar - Ads */}
           <aside className="hidden lg:block w-[300px] shrink-0">
-            <div className="sticky top-[60px]">
-              <div className="bg-muted rounded-lg p-6 text-center text-muted-foreground text-sm min-h-[250px] flex items-center justify-center border border-dashed border-border">
+            <div className="sticky top-[52px] space-y-4">
+              <div className="bg-muted border border-border min-h-[250px]">
                 {/* Reserved for advertisements */}
               </div>
 
-              <div className="mt-6 bg-muted rounded-lg p-6 text-center text-muted-foreground text-sm min-h-[250px] flex items-center justify-center border border-dashed border-border">
+              <div className="bg-muted border border-border min-h-[250px]">
                 {/* Reserved for advertisements */}
               </div>
             </div>

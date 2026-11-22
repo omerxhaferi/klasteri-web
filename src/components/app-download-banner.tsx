@@ -41,15 +41,15 @@ export function AppDownloadBanner() {
     };
 
     return (
-        <div className="lg:hidden mb-4 rounded-xl bg-primary/4 dark:bg-primary/8 border border-primary/15 px-3 py-3">
-            <div className="flex items-center gap-3">
-                <Logo width={36} height={36} />
+        <div className="lg:hidden mb-3 bg-muted border border-border px-2.5 py-2.5">
+            <div className="flex items-center gap-2.5">
+                <Logo width={34} height={34} />
 
                 <div className="min-w-0 flex-1">
-                    <p className="text-[13px] font-semibold text-foreground leading-tight">
+                    <p className="text-[13px] font-bold leading-tight">
                         Klasteri në telefonin tënd
                     </p>
-                    <p className="text-[11.5px] text-muted-foreground leading-tight mt-0.5">
+                    <p className="text-[12px] text-muted-foreground leading-tight mt-0.5">
                         Shkarko aplikacionin falas për iPhone dhe Android
                     </p>
                 </div>
@@ -57,13 +57,13 @@ export function AppDownloadBanner() {
                 <button
                     onClick={dismiss}
                     aria-label="Mbyll"
-                    className="shrink-0 -mr-1 p-1.5 text-muted-foreground hover:text-foreground transition-colors"
+                    className="shrink-0 -mr-1 p-1.5 text-muted-foreground hover:text-foreground"
                 >
                     <X className="h-4 w-4" />
                 </button>
             </div>
 
-            <StoreButtons className="mt-2.5" />
+            <StoreButtons className="mt-2" />
         </div>
     );
 }

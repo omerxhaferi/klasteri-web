@@ -4,8 +4,15 @@ import * as React from "react"
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 
-export function ThemeToggle() {
-    const { theme, setTheme } = useTheme()
+const BOX = "flex items-center justify-center w-8 h-8 rounded-sm border"
+/** On the page, and on the slate bar (the cluster page's header). */
+const TONE = {
+    page: "border-border text-muted-foreground hover:bg-muted hover:text-foreground",
+    bar: "border-white/30 text-white/80 hover:bg-white/10 hover:text-white",
+}
+
+export function ThemeToggle({ on = "page" }: { on?: "page" | "bar" }) {
+    const { resolvedTheme, setTheme } = useTheme()
     const [mounted, setMounted] = React.useState(false)
 
     // Avoid hydration mismatch
@@ -13,21 +20,23 @@ export function ThemeToggle() {
         setMounted(true)
     }, [])
 
+    // Same box, empty, so the header does not shift when the icon arrives.
     if (!mounted) {
-        return (
-            <div className="w-9 h-9 rounded-md bg-muted/50 animate-pulse" />
-        )
+        return <div className={`${BOX} ${on === "bar" ? "border-white/30" : "border-border"}`} />
     }
+
+    // `resolvedTheme`, not `theme`: on the default "system" setting `theme` is
+    // the string "system", so comparing it to "dark" always chose dark first
+    // and a reader on a dark OS had to press the button twice.
+    const isDark = resolvedTheme === "dark"
 
     return (
         <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="relative flex items-center justify-center w-9 h-9 rounded-md hover:bg-muted transition-colors border border-border"
-            aria-label="Toggle theme"
+            onClick={() => setTheme(isDark ? "light" : "dark")}
+            className={`${BOX} ${TONE[on]}`}
+            aria-label={isDark ? "Kalo në pamjen e çelët" : "Kalo në pamjen e errët"}
         >
-            <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            <span className="sr-only">Toggle theme</span>
+            {isDark ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
         </button>
     )
 }

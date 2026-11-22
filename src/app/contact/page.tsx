@@ -9,10 +9,10 @@ export const metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <SiteHeader />
 
-      <main className="max-w-5xl mx-auto px-4 py-12">
+      <main className="w-full flex-1 max-w-5xl mx-auto px-4 py-12">
         <h1 className="text-3xl font-bold mb-2">Na Kontaktoni</h1>
         <p className="text-muted-foreground mb-8">
           Jemi këtu për t'ju ndihmuar. Zgjidhni mënyrën më të përshtatshme për të na kontaktuar.

@@ -1,80 +1,133 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400..800;1,6..72,400..700&display=swap');
-
 @import "tailwindcss";
 
+/*
+ * Klasteri's look: a plain news portal with its own face.
+ *
+ * White page, Arial, ink-black headlines, a solid teal section bar, a filled
+ * tab over a rule for every block heading in that section's colour — the
+ * conventions readers here know from the portals they already use, in
+ * Klasteri's colours rather than anybody else's. Teal because no portal in
+ * the region uses it (2026-11-22: owner compared ink, teal and wine bars). Deliberately no off-white
+ * "paper", no serif display face, no letter-spaced micro-labels, no soft
+ * cards (those read as machine-made), and no blue headlines on navy, which is
+ * time.mk's signature, nor a red bar, which is fax.al's.
+ *
+ * Rules that keep it that way:
+ *  - Colour comes from the variables below, never from a one-off hex in a
+ *    component (publisher brand colours in lib/constants.ts are the exception).
+ *  - A link to an ARTICLE is `text-headline` (ink). `text-primary` is for the
+ *    site's own small links and buttons ("edhe N lajme tjera »", "më shumë »").
+ *  - Corners are square. The radius scale in @theme is clamped so a stray
+ *    `rounded-xl` cannot bring the cards back; only `rounded-full` is round.
+ *  - Dark mode is neutral graphite — no blue cast.
+ */
+
+/* The theme is next-themes' `.dark` class (the site's own toggle), so `dark:`
+   has to follow that class. Tailwind's default follows the OS, which is wrong
+   for anyone whose chosen theme differs from it. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  /* Warm "paper" light theme */
-  --background: #faf9f5;
-  --foreground: #1c1a15;
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+  /* Every headline and every link to an article. */
+  --headline: #111111;
   --card: #ffffff;
-  --card-foreground: #1c1a15;
-  --muted: #f0eee6;
-  --muted-foreground: #6e6a5e;
-  --border: #e5e2d6;
-  --primary: #1e3a5f;
+  --card-foreground: #1a1a1a;
+  --muted: #f3f3f3;
+  --muted-foreground: #5e5e5e;
+  --border: #d6d6d6;
+  /* The site's own links and buttons ("edhe N lajme tjera »"). 6.5:1. */
+  --primary: #0b6873;
   --primary-foreground: #ffffff;
-  --accent: #ece9df;
-  --hot: #c2410c;
-  /* Fuel price moves (components/fuel-prices-card.tsx). Here and not as
-     dark: utilities, because Tailwind's dark: follows the OS while this site's
-     theme follows its own toggle. Both ≥ 4.5:1 on --background. */
-  --price-down: #047857;
-  --price-up: #dc2626;
+  --accent: #e9e9e9;
+  /* "tani", a fresh article's bullet, the ranking numbers. */
+  --hot: #d0021b;
+  /* The section bar and the footer — Klasteri teal. White on it: 8.5:1. */
+  --brand: #0b5560;
+  /* Default fill of a heading tab (components/tab-heading.tsx). */
+  --tab: #0b5560;
+  /* Fuel price moves (components/fuel-prices-card.tsx). */
+  --price-down: #0a7a33;
+  --price-up: #d0021b;
 }
 
 .dark {
-  /* Warm ink dark theme */
-  --background: #131211;
-  --foreground: #eeeae1;
-  --card: #1b1a18;
-  --card-foreground: #eeeae1;
-  --muted: #262420;
-  --muted-foreground: #a29c8e;
-  --border: #2d2b26;
-  --primary: #6aa5dd;
-  --primary-foreground: #131211;
-  --accent: #262420;
-  --hot: #fb923c;
-  --price-down: #34d399;
-  --price-up: #f87171;
+  --background: #151515;
+  --foreground: #e4e4e4;
+  --headline: #f4f4f4;
+  --card: #1c1c1c;
+  --card-foreground: #e4e4e4;
+  --muted: #1f1f1f;
+  --muted-foreground: #9d9d9d;
+  --border: #353535;
+  --primary: #6cc7d0;
+  --primary-foreground: #0d1a1c;
+  --accent: #2a2a2a;
+  --hot: #ff5a4f;
+  /* The same teal in both themes: it is the brand, not a surface. */
+  --brand: #0b5560;
+  --tab: #11656f;
+  --price-down: #3ecf7a;
+  --price-up: #ff6b61;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-headline: var(--headline);
   --color-card: var(--card);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --color-primary: var(--primary);
-  /* Without this token `text-primary-foreground` is a no-op class, so text on
-     a bg-primary button falls back to --foreground: dark ink on navy in light
-     mode. Also fixes the mobile search submit button, which already used it. */
   --color-primary-foreground: var(--primary-foreground);
   --color-accent: var(--accent);
   --color-hot: var(--hot);
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --color-brand: var(--brand);
+  --color-tab: var(--tab);
+
+  --font-sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  /* Libre Franklin, loaded in app/layout.tsx: the section bar, heading tabs,
+     the wordmark and the ranking numbers. Nothing else. */
+  --font-display: var(--font-franklin), "Franklin Gothic Medium", Arial, sans-serif;
+
+  --radius-xs: 1px;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 3px;
+  --radius-xl: 3px;
+  --radius-2xl: 3px;
+  --radius-3xl: 3px;
+  --radius-4xl: 3px;
 }
 
-* {
-  border-color: var(--border);
-}
+/*
+ * In the base layer on purpose. These used to be unlayered, and unlayered CSS
+ * beats every Tailwind utility — so `text-primary` on a link, `border-primary`
+ * on anything and `hover:no-underline` silently did nothing.
+ */
+@layer base {
+  * {
+    border-color: var(--border);
+  }
 
-body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: 'Inter', system-ui, sans-serif;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.4;
+  }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 
-a:hover {
-  text-decoration: underline;
+  a:hover {
+    text-decoration: underline;
+  }
 }
 
 /* Hide scrollbar for horizontal scroll sections */
