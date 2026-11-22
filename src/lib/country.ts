@@ -136,3 +136,14 @@ export const COUNTRY_NAMES: Record<CountryCode, string> = {
     KS: 'Kosovë',
     MK: 'Maqedoni e Veriut',
 };
+
+/**
+ * "në Kosovë", for a sentence that points at another edition ("Edhe në Kosovë:
+ * 38 lajme"). Its own map because Albanian inflects the name after "në":
+ * Macedonia becomes "Maqedoninë e Veriut", which neither label above is.
+ */
+export const IN_COUNTRY: Record<CountryCode, string> = {
+    AL: 'në Shqipëri',
+    KS: 'në Kosovë',
+    MK: 'në Maqedoninë e Veriut',
+};

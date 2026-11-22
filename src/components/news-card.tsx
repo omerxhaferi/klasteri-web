@@ -4,6 +4,7 @@ import { Cluster, Article } from "@/lib/api";
 import { CategoryColors, CategoryKey, SOURCE_COLORS } from "@/lib/constants";
 import { getAccessibleColor } from "@/lib/utils";
 import { hideIfBroken, hideOnError } from "@/lib/images";
+import { EditionsLine } from "@/components/editions-line";
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
 
@@ -209,6 +210,13 @@ export function NewsCard({ cluster }: NewsCardProps) {
 
             <SubArticles articles={subArticles} />
             <CoverageLine cluster={cluster} />
+            {/* Home and regional news only. A world or sports story is in every
+                edition by nature, so "also in Kosovo" tells the reader nothing
+                about it; about an Albanian story it does. The story page shows
+                the line for every story. */}
+            {(categoryKey === "vendi" || categoryKey === "rajoni") && (
+                <EditionsLine editions={cluster.editions} className="mt-1 text-[12px]" />
+            )}
         </article>
     );
 }

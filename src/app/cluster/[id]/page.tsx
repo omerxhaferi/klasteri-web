@@ -83,6 +83,8 @@ export default async function ClusterPage({
                     beats={cluster.beats}
                     articleCount={cluster.article_count}
                     categoryKey={categoryKey}
+                    editions={cluster.editions}
+                    angles={cluster.angles}
                 />
             </main>
 

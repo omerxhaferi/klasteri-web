@@ -20,6 +20,25 @@ export interface Beat {
     source_ids: number[];
 }
 
+/** The same story in another edition (klasteri-api/src/extras.ts). */
+export interface EditionLink {
+    country: CountryCode;
+    cluster_id: number;
+    title: string;
+    article_count: number;
+    outlet_count: number;
+}
+
+/** One part of a big story: the verdict, a reaction, a co-defendant's sentence. */
+export interface StoryAngle {
+    title: string;
+    lead_article_id: number;
+    /** In the cluster's article order. */
+    article_ids: number[];
+    article_count: number;
+    outlet_count: number;
+}
+
 export interface Cluster {
     id: number;
     title: string;
@@ -29,6 +48,10 @@ export interface Cluster {
     last_updated: string;
     articles: Article[];
     beats?: Beat[];
+    outlet_count?: number;
+    editions?: EditionLink[];
+    /** Only on getCluster, and only for a story big enough to divide. */
+    angles?: StoryAngle[];
 }
 
 export interface HomePageData {
