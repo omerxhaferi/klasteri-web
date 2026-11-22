@@ -70,24 +70,32 @@ function MetaLine({ article, sourceColor }: { article: Article; sourceColor: str
 }
 
 /**
- * Up to 3 other newsrooms on the same story: their headline as a link, their
- * name after it. The bullet turns red while the article is fresh.
+ * Up to 3 other newsrooms on the same story, one line each: the NEWSROOM first,
+ * bold in the accent, then its headline in ink.
+ *
+ * Name first is the owner's call (2026-11-22). With the headline first and the
+ * name trailing in grey, the three kinds of text in a card — the lead's
+ * description, the other headlines and their newsrooms — read as one block.
+ * One accent for every name here, not each outlet's brand colour, so the lead
+ * newsroom's own colour above stays the one that stands out. A red bar at the
+ * left marks an article that has only just appeared.
  */
 function SubArticles({ articles }: { articles: Article[] }) {
     if (articles.length === 0) return null;
     return (
-        <ul className="mt-2 space-y-[3px]">
+        <ul className="mt-2.5 space-y-1">
             {articles.map((article) => {
                 const isRecent = isRecentArticle(article.crawled_at);
                 return (
-                    <li key={article.id} className="flex items-baseline gap-1.5 text-[13px] leading-[1.35]">
-                        <span
-                            aria-hidden
-                            className={`shrink-0 text-[8px] leading-none -translate-y-px ${
-                                isRecent ? "text-hot" : "text-muted-foreground/60"
-                            }`}
-                        >
-                            ■
+                    <li key={article.id} className="relative flex items-baseline gap-2 text-[13px] leading-[1.35]">
+                        {isRecent && (
+                            <span
+                                aria-hidden
+                                className="absolute -left-2.5 top-[2px] bottom-[2px] w-[3px] bg-hot"
+                            />
+                        )}
+                        <span className="shrink-0 text-[12px] font-bold text-primary whitespace-nowrap">
+                            {article.source_name}
                         </span>
                         <a
                             href={article.url}
@@ -97,9 +105,6 @@ function SubArticles({ articles }: { articles: Article[] }) {
                         >
                             {article.title}
                         </a>
-                        <span className="shrink-0 text-[12px] text-muted-foreground whitespace-nowrap">
-                            {article.source_name}
-                        </span>
                     </li>
                 );
             })}
@@ -175,8 +180,9 @@ export function NewsCard({ cluster }: NewsCardProps) {
 
                     <MetaLine article={mainArticle} sourceColor={mainSourceColor} />
 
+                    {/* Grey, so it can never be mistaken for one of the headlines below. */}
                     {description && (
-                        <p className="hidden md:block mt-1.5 text-[13px] leading-[1.45] line-clamp-2">
+                        <p className="hidden md:block mt-1.5 text-[13px] leading-[1.45] text-muted-foreground line-clamp-2">
                             {description}
                         </p>
                     )}
