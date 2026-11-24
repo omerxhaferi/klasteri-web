@@ -240,6 +240,36 @@ export async function getFuelPrices(country?: CountryCode): Promise<FuelPricesDa
     return res.json();
 }
 
+/** The sidebar's "Moti": MET Norway's forecast for each edition's six towns (none for US). */
+export interface TownWeather {
+    name: string;
+    temperature: number;           // °C, the hour we are in
+    symbol: string;                // MET symbol code: "lightrain", "partlycloudy_day", …
+    description: string;           // the same in Albanian: "shi i lehtë"
+    tomorrow: { min: number; max: number; symbol: string; description: string } | null;
+}
+
+export interface WeatherData {
+    country: string;
+    source: string | null;         // "MET Norway" whenever there is anything
+    towns: TownWeather[];          // capital first
+}
+
+export async function getWeather(country?: CountryCode): Promise<WeatherData> {
+    const res = await fetch(await apiUrl(`/api/weather`, country), {
+        cache: 'no-store',
+        // The page waits for this before it renders. A slow forecast (MET
+        // answering a freshly restarted API) costs the card, not the news.
+        signal: AbortSignal.timeout(3000),
+    });
+
+    if (!res.ok) {
+        throw new Error('Failed to fetch weather');
+    }
+
+    return res.json();
+}
+
 export async function getDailySummary(country?: CountryCode): Promise<DailySummary | null> {
     const res = await fetch(await apiUrl(`/api/summary/today`, country), {
         cache: 'no-store',

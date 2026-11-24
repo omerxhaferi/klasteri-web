@@ -50,6 +50,11 @@
   /* Fuel price moves (components/fuel-prices-card.tsx). */
   --price-down: #0a7a33;
   --price-up: #d0021b;
+  /* Weather icons (components/weather-card.tsx). Each at least 3:1 on the page. */
+  --wx-sun: #b07800;
+  --wx-rain: #1f6fb2;
+  --wx-snow: #3f7fae;
+  --wx-cloud: #767676;
 }
 
 .dark {
@@ -70,6 +75,10 @@
   --tab: #11656f;
   --price-down: #3ecf7a;
   --price-up: #ff6b61;
+  --wx-sun: #f2b632;
+  --wx-rain: #6cb2f0;
+  --wx-snow: #b5d3ee;
+  --wx-cloud: #a8a8a8;
 }
 
 @theme inline {

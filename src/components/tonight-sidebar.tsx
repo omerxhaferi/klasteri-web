@@ -1,12 +1,13 @@
 "use client";
 
-import { DailySummary, FuelPricesData, TonightCluster } from "@/lib/api";
+import { DailySummary, FuelPricesData, TonightCluster, WeatherData } from "@/lib/api";
 import { CategoryColors, CategoryKey, SOURCE_COLORS } from "@/lib/constants";
 import { getAccessibleColor } from "@/lib/utils";
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
 import { SummaryPlayerCard } from "@/components/summary-player-card";
 import { FuelPricesCard } from "@/components/fuel-prices-card";
+import { WeatherCard } from "@/components/weather-card";
 import { TabHeading } from "@/components/tab-heading";
 
 interface TonightSidebarProps {
@@ -16,6 +17,8 @@ interface TonightSidebarProps {
     forceShow?: boolean;
     /** Above "Titujt kryesor"; the list scrolls to make room for it. */
     fuel?: FuelPricesData | null;
+    /** Under the fuel prices (in their place for Kosovo, which has none). */
+    weather?: WeatherData | null;
 }
 
 function formatTime(dateString: string): string {
@@ -35,7 +38,7 @@ function formatTime(dateString: string): string {
 
 const subscribe = () => () => {};
 
-export function TonightSidebar({ clusters, summary, fuel }: TonightSidebarProps) {
+export function TonightSidebar({ clusters, summary, fuel, weather }: TonightSidebarProps) {
     const isDarkMode = useSyncExternalStore(
         subscribe,
         () => document.documentElement.classList.contains("dark"),
@@ -43,8 +46,9 @@ export function TonightSidebar({ clusters, summary, fuel }: TonightSidebarProps)
     );
 
     const hasFuel = !!fuel && fuel.prices.length > 0;
+    const hasWeather = !!weather && weather.towns.length > 0;
 
-    if (clusters.length === 0 && !summary && !hasFuel) {
+    if (clusters.length === 0 && !summary && !hasFuel && !hasWeather) {
         return null;
     }
 
@@ -59,6 +63,8 @@ export function TonightSidebar({ clusters, summary, fuel }: TonightSidebarProps)
                 )}
 
                 {hasFuel && <FuelPricesCard data={fuel!} className="shrink-0" />}
+
+                {hasWeather && <WeatherCard data={weather!} className="shrink-0" />}
 
                 {clusters.length > 0 && (
                     <div className="flex flex-col min-h-0">

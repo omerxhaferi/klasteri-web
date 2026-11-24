@@ -18,14 +18,17 @@ import {
     getTonightNews,
     getDailySummary,
     getFuelPrices,
+    getWeather,
     Cluster,
     HomePageData,
     TonightData,
     DailySummary,
     FuelPricesData,
+    WeatherData,
 } from "@/lib/api";
 import { NewsCard } from "@/components/news-card";
 import { FuelPricesCard } from "@/components/fuel-prices-card";
+import { WeatherCard } from "@/components/weather-card";
 import { TabHeading } from "@/components/tab-heading";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -95,6 +98,10 @@ export async function HomeFeed({ country, base, category, previewSummary = false
     console.error("Failed to fetch fuel prices:", e);
     return null;
   });
+  const weatherRequest: Promise<WeatherData | null> = getWeather(country).catch((e) => {
+    console.error("Failed to fetch weather:", e);
+    return null;
+  });
 
   let homepageData: HomePageData = {
     top_overall: [], vendi: [], rajoni: [], bota: [], sport: [], tech: []
@@ -160,6 +167,8 @@ export async function HomeFeed({ country, base, category, previewSummary = false
 
   const fuelPrices = await fuelRequest;
   const hasFuel = !!fuelPrices && fuelPrices.prices.length > 0;
+  const weather = await weatherRequest;
+  const hasWeather = !!weather && weather.towns.length > 0;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -202,6 +211,7 @@ export async function HomeFeed({ country, base, category, previewSummary = false
             serverIsNight={tonightData.is_active_hours}
             forceShow={previewSummary}
             fuel={fuelPrices}
+            weather={weather}
           />
 
           {/* News Feed */}
@@ -214,6 +224,7 @@ export async function HomeFeed({ country, base, category, previewSummary = false
 
                 {/* Mobile fuel prices, above Titujt kryesor as in the desktop sidebar */}
                 {hasFuel && <FuelPricesCard data={fuelPrices!} className="lg:hidden mt-5 mb-5" />}
+                {hasWeather && <WeatherCard data={weather!} className="lg:hidden mt-5 mb-5" />}
 
                 {/* Mobile Titujt kryesor - after the top stories */}
                 <TonightMobileCombined
